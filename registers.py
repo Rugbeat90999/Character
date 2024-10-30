@@ -1,5 +1,9 @@
 from LocalLibrary import *
 from commonLib import UUID
+from main import Character
+
+
+
 
 
 class Item:
@@ -121,12 +125,56 @@ class Action:
 
 
 class Effects:
-    @staticmethod
-    def register_effect(name:str):
-        Effect()
+    def __init__(self):
+        self.instant_effects = list['InstantEffect']()
+        self.temporary_effects = list['TemporaryEffect']()
+        self.permanant_effects = list['PermanantEffect']()
 
 
-class EffectCatagory:
+    def Register_Instant_Effect(self, uuid:UUID):
+        self.instant_effects.append(InstantEffect(uuid))
+
+    def Register_Temporary_Effect(self, uuid:UUID):
+        self.temporary_effects.append(InstantEffect(uuid))
+
+    def Register_Permanant_Effect(self, uuid:UUID):
+        self.permanant_effects.append(InstantEffect(uuid))
+
+    def __str__(self):
+        rows = ""
+        i = len(self.instant_effects)
+        t = len(self.temporary_effects)
+        p = len(self.permanant_effects)
+        while i > 0 or t > 0 or p > 0:
+            temp = ""
+            if i > 0:
+                temp += f"{self.instant_effects[i-1].__format__("name")}".ljust(20)
+            else:
+                temp += "                    "
+            temp += "|"
+            if t > 0:
+                temp += f"{self.temporary_effects[t-1].__format__("name")}".ljust(20)
+            else:
+                temp += "                    "
+            temp += "|"
+            if p > 0:
+                temp += f"{self.permanant_effects[p-1].__format__("name")}".ljust(20)
+            else:
+                temp += "                    "
+            temp += "\n"
+            
+            i -= 1
+            t -= 1
+            p -= 1
+            rows += temp
+
+        return f"Effect:\n"\
+               f"                    |                    |                    \n"\
+               f"{rows}"\
+               f"                    |                    |                    "
+
+
+class EffectCategory:
     def __init__(self, uuid:UUID, name:str="N/A"):
         self.__uuid = uuid
         self.name = name
@@ -158,8 +206,11 @@ class EffectCatagory:
 
 
 class Effect:
+    '''
+This is a parent class and should not be used directly
+    '''
     def __init__(self, uuid:UUID):
-        self.uuid = uuid
+        self.__uuid = uuid
         self.name = "N/A"
         self.description = "N/A"
         self.methods = list[tuple[str, str, int]]()
@@ -178,11 +229,10 @@ class Effect:
         self.intelligence = 0
         self.charisma = 0
     
+    @property
+    def uuid(self) -> UUID:
+        return self.__uuid
     
-    def trigger(self):
-        for method in self.methods:
-          self.__getattribute__(method[0])(method)
-
 
     def add_name(self, name:str):
         self.name = name
@@ -192,65 +242,344 @@ class Effect:
         self.description = description
     
 
-    def add_catagory(self, uuid:UUID):
-        getattr(EffectCatagory, "poisen")
+    def add_catagory(self, category:EffectCategory):
+        getattr(category, "add_effect")(self)
 
     
-    def add_effect(self, method: tuple[str | int]):
-        tuple(method)
-        self.methods.append(method)
+    def add_effect(self, *args):
+        '''
+Adds a new effect to the Effect based on the args given.
+the first argument is the function, everything after is passed into the function
+
+Current options for instant effects:
+  damage(stat_to_damage, amount_of_damage)
+  heal(stat_to_heal, amount_of_heal)
+
+Current options for temporary effects:
+  poison(stat_to_damage, amount_of_damage)
+  weaken(stat_to_weaken, amount_to_weaken
+  regen(stat_to_heal, amount_of_heal_per_second)
+  boost(stat_to_boost, amount_to_boost)
+
+Current options for permanent effects:
+  cripple(stat_to_weaken, amount_to_weaken)
+  boost(stat_to_boost, amount_of_boost)
+  lycanthopey()
+'''
+        self.methods.append(args)
+    
+    def remove_effect(self, *args):
+        '''
+removes an added effect, you must put in the exact args in the exact order they were added in for it to work
+        '''
+        try:
+          self.methods.remove(args)
+        except ValueError as e:
+            if str(e) == "list.remove(x): x not in list":
+                raise ValueError(f"{args} is not an added effect")
+            else:
+                raise ValueError(e)
+            
+    
+    # def apply_effet(self, target: "Character"):
+        # target.status.
+            
 
 
 class InstantEffect(Effect):
-    def __init__(self, id:UUID):
-        super().__init__(id)
+    def __init__(self, uuid:UUID):
+        super().__init__(uuid)
+        self.__uuid = uuid
+    
+
+    def __str__(self) -> str:
+        methods = ""
+        for method in self.methods:
+            methods += f"{method[0]}, "
+        methods = methods.removesuffix(", ")
+        return f"UUID: {self.__uuid}"\
+f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
+f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
+f"{ f"\nEffects: {methods}" if methods  != [] else ""}"\
+f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
+    
+
+    def __format__(self, format_spec):
+        '''
+        Options:\n
+            \"effects\": returns a string of the effects\n
+            \"catagories\": returns a string of the catagories\n
+            \"description\": returns a string of the description\n
+            \"name\": returns a string of the name\n
+            \"uuid\": returns a string of the uuid
+        '''
+        if format_spec == "effects":
+            return ", ".join(self.methods)
+        elif format_spec == "catagories":
+            return ", ".join(self.catagory)
+        elif format_spec == "description":
+            return self.description
+        elif format_spec == "name":
+            return self.name
+        elif format_spec == "uuid":
+            return self.uuid
 
 
     def damage(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_damage, amount_to_damage
+
+        effectable stats: "health", "stamina", "mana"
+        '''
         damage_type:str = var_tuple[1]
         amount:int = var_tuple[2]
-        if damage_type not in ["health", "stamina", "mana"]:
-          raise ValueError(f"{damage_type}, is not damageable stat")
+        if amount < 1:
+            raise ValueError("Instant Damage must be greater than zero.")
+        damageable = ["health", "stamina", "mana"]
+        if damage_type not in damageable:
+          raise ValueError(f"{damage_type}, is not damageable stat, pick from: {damageable}")
         
         self.__setattr__(damage_type, self.__getattribute__(damage_type) - amount)
 
 
     def heal(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_heal, amount_to_heal
+
+        effectable stats: "health", "stamina", "mana"
+        '''
         heal_type:str = var_tuple[1]
         amount:int = var_tuple[2]
+        if amount < 1:
+            raise ValueError("Instant Heal must be greater than zero.")
+        healable = ["health", "stamina", "mana"]
         if heal_type not in ["health", "stamina", "mana"]:
-          raise ValueError(f"{heal_type}, is not healable stat")
+          raise ValueError(f"{heal_type}, is not healable stat, pick from: {healable}")
 
         self.__setattr__(heal_type, self.__getattribute__(heal_type) + amount)
 
 
-    def __str__(self) -> str:
-        return f"UUID: {self.uuid}"\
-f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
-f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
-f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
-
-
+    def trigger(self):
+        for method in self.methods:
+          self.__getattribute__(method[0])(method)
 
 
 class TemporaryEffect(Effect):
     def __init__(self, name:str):
         super().__init__(name)
-        self.duration = 0 
+        self.duration = 0.0
+        self.time_passed = .0
+
+
+    def __str__(self) -> str:
+        methods = ""
+        for method in self.methods:
+            methods += f"{method[0]}, "
+        methods = methods.removesuffix(", ")
+        return f"UUID: {self.__uuid}"\
+f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
+f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
+f"{ f"\nEffects: {methods}" if methods  != [] else ""}"\
+f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
+
+
+    def poison(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_poisen, amount_of_damage_per_second
+
+        damageable_stats: "health", "stamina", "mana"
+        '''
+        damage_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
+        if amount < 1:
+            raise ValueError("Amount of damage must be greater than 0.")
+        damageable = ["health", "stamina", "mana"]
+        if damage_type not in damageable:
+          raise ValueError(f"{damage_type}, is not damageable stat, pick from: {damageable}")
+        
+        self.__setattr__(damage_type, self.__getattribute__(damage_type) - (amount*self.time_passed))
+    
+
+    def weaken(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_weaken, amount_to_weaken
+
+        effectable stats: "max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"
+        '''
+        damage_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
+        if amount < 1:
+            raise ValueError("Amount of damage must be greater than 0.")
+        damageable = ["max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"]
+        if damage_type not in damageable:
+          raise ValueError(f"{damage_type}, is not a stat")
+        
+        if self.duration > 0:
+            self.__setattr__(damage_type, -amount)
+        else:
+            self.__setattr__(damage_type, self.__getattribute__(damage_type) + amount)
+
+
+    def regen(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_heal, amount_of_heal_per_second
+
+        damageable_stats: "health", "stamina", "mana"
+        '''
+        heal_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
+        healable = ["health", "stamina", "mana"]
+        if heal_type not in healable:
+          raise ValueError(f"{heal_type}, is not healable stat, pick from: {healable}")
+
+        self.__setattr__(heal_type, self.__getattribute__(heal_type) + (amount*self.time_passed))
+        
+
+    def boost(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_boost, amount_of_boost
+
+        damageable_stats: "max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"
+        '''
+        heal_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
+        healable = ["max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"]
+        if heal_type not in healable:
+          raise ValueError(f"{heal_type}, is not healable stat, pick from: {healable}")
+        if amount < 1:
+            raise ValueError("Temporary Boost requires a positive number")
+        
+        if self.duration > 0:
+            self.__setattr__(heal_type, amount)
+        else:
+            self.__setattr__(heal_type, self.__getattribute__(heal_type) - amount)
+    
+
+    def trigger(self, duration:float):
+        self.duration = duration
+        for method in self.methods:
+          self.__getattribute__(method[0])(method)
+    
+
+    def triggered(self, time_passed:float):
+        self.duration -= time_passed
+        self.time_passed = time_passed
 
 
 class PermanantEffect(Effect):
     def __init__(self, name:str):
         super().__init__(name)
+        self.end = False
+
+
+    def __str__(self):
+        methods = ""
+        for method in self.methods:
+            methods += f"{method[0]}, "
+        methods = methods.removesuffix(", ")
+        return f"UUID: {self.__uuid}"\
+f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
+f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
+f"{ f"\nEffects: {methods}" if methods  != [] else ""}"\
+f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
+    
+
+    def weaken(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_weaken, amount_to_weaken
+
+        effectable stats: "max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"
+        '''
+        damage_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
+        if amount < 1:
+            raise ValueError("Amount of damage must be greater than 0.")
+        damageable = ["max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"]
+        if damage_type not in damageable:
+          raise ValueError(f"{damage_type}, is not a stat")
+        
+        self.__setattr__(damage_type, -amount)
+        if self.end:
+          self.__setattr__(damage_type, self.__getattribute__(damage_type) + amount)
+            
+
+
+    def boost(self, var_tuple:tuple[str, str, int]):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        args = stat_to_boost, amount_of_boost
+
+        damageable_stats: "max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"
+        '''
+        heal_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
+        healable = ["max_health", "max_stamina", "max_mana", "strength", "constitution", "agility", "wisdom", "intelligence", "charisma"]
+        if heal_type not in healable:
+          raise ValueError(f"{heal_type}, is not healable stat, pick from: {healable}")
+        if amount < 1:
+            raise ValueError("Temporary Boost requires a positive number")
+        
+        self.__setattr__(heal_type, amount)
+        if self.end:
+          self.__setattr__(heal_type, self.__getattribute__(heal_type) + amount)
+    
+
+    def lycanthopey(self):
+        '''
+        this function should not be called directly, instead use the add_effect method
+
+        no args
+        '''
+        self.wereworlf = True
+            
+    
+
+    def trigger(self):
+        for method in self.methods:
+          self.__getattribute__(method[0])(method)
 
 
 
 
-damage = InstantEffect(UUID())
 
-damage.add_name("Test Effect")
-damage.add_description("Just an effect to test out stuff")
-damage.add_effect(("damage", "health", 2))
-damage.trigger()
 
-print(f"Damage:\n{damage}")
+
+# damage = InstantEffect(UUID("46854bc4-93e8-8cf5-370b-5ddb36597118"))
+# category = EffectCategory(UUID(), "Test Category")
+
+
+
+# damage.add_name("Test Effect")
+# damage.add_description("Just an effect to test out stuff")
+# damage.add_catagory(category)
+# damage.add_effect("damage", "health", 2)
+# damage.add_effect("damage", "health", 2)
+# # damage.remove_effect("damage", "health", 2)
+# # damage.trigger()
+
+# print(f"Damage:\n{damage}")
+
+effects = Effects()
+print(effects)
+effects.Register_Instant_Effect(UUID())
+effects.Register_Instant_Effect(UUID())
+effects.Register_Instant_Effect(UUID())
+effects.instant_effects[0].add_name("name test")
+effects.instant_effects[1].add_name("name test1")
+effects.instant_effects[2].add_name("name test2")
+print(effects)
