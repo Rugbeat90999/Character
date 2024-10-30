@@ -1,3 +1,5 @@
+from commonLib import UUID
+
 
 class Item:
     def __init__(self, name:str, id:int, description:str):
@@ -121,14 +123,49 @@ class Action:
 
 class Effects:
     @staticmethod
-    def register_effect(name:str, effect_type:str, poison:bool):
+    def register_effect(name:str):
         Effect()
 
 
-class Effect:
-    def __init__(self:"Effect", name:str, positive:bool):
+class EffectCatagory:
+    def __init__(self, uuid:UUID, name:str="N/A"):
+        self.__uuid = uuid
         self.name = name
-        self.positive = positive
+        self.effects = list[Effect]()
+    
+    @property
+    def uuid(self):
+        return self.__uuid
+
+
+    def change_uuid(self, uuid:UUID):
+        answer = input("Changeing the UUID of a EffectCatagory may cause fatal errors, are you sure you want to continue? (y/n): ")
+        while True:
+          if answer == "y":
+              self.__uuid = uuid
+              break
+          elif answer == "n":
+              break
+          else:
+              print("invalid answer please answer with 'y' or 'n'")
+
+    
+    def add_effect(self, effect:"Effect"):
+        self.effects.append(effect)
+
+
+    def __str__(self) -> str:
+        return f"EffectCatagory: {self.name}"
+
+
+class Effect:
+    def __init__(self, uuid:UUID):
+        self.uuid = uuid
+        self.name = "N/A"
+        self.description = "N/A"
+        self.methods = list[tuple[str, str, int]]()
+        self.catagory = list[str]()
+        
         self.max_health = 0
         self.max_stamina = 0
         self.max_mana = 0
@@ -141,42 +178,66 @@ class Effect:
         self.wisdom = 0
         self.intelligence = 0
         self.charisma = 0
-        self.methods = list[list]()
     
     
     def trigger(self):
-        for method_info in self.methods:
-            self.__getattribute__()
+        for method in self.methods:
+          self.__getattribute__(method[0])(method)
+
+
+    def add_name(self, name:str):
+        self.name = name
+    
+    
+    def add_description(self, description:str):
+        self.description = description
+    
+
+    def add_catagory(self, name:str):
+        getattr(EffectCatagory, "poisen")
+
+    
+    def add_effect(self, method: tuple[str | int]):
+        tuple(method)
+        self.methods.append(method)
+
 
 class InstantEffect(Effect):
-    def __init__(self, name:str):
-        super().__init__(name, False)
-    
-    def damage(self, var_tuple:tuple[str, int]):
-        damage_type:str = var_tuple[0]
-        amount:int = var_tuple[1]
+    def __init__(self, id:UUID):
+        super().__init__(id)
+
+
+    def damage(self, var_tuple:tuple[str, str, int]):
+        damage_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
         if damage_type not in ["health", "stamina", "mana"]:
           raise ValueError(f"{damage_type}, is not damageable stat")
+        
         self.__setattr__(damage_type, self.__getattribute__(damage_type) - amount)
 
-    def heal(self, var_tuple:tuple[str, int]):
-        heal_type:str = var_tuple[0]
-        amount:int = var_tuple[1]
+
+    def heal(self, var_tuple:tuple[str, str, int]):
+        heal_type:str = var_tuple[1]
+        amount:int = var_tuple[2]
         if heal_type not in ["health", "stamina", "mana"]:
           raise ValueError(f"{heal_type}, is not healable stat")
 
         self.__setattr__(heal_type, self.__getattribute__(heal_type) + amount)
-    
-    def activate(self, methods: list[tuple[str | int]]):
-        self.methods = methods
-    
-        
-    
+
+
+    def __str__(self) -> str:
+        return f"UUID: {self.uuid}"\
+f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
+f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
+f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
+
+
+
 
 class TemporaryEffect(Effect):
     def __init__(self, name:str):
         super().__init__(name)
-        self.duration = 0
+        self.duration = 0 
 
 
 class PermanantEffect(Effect):
@@ -186,9 +247,11 @@ class PermanantEffect(Effect):
 
 
 
-damage = InstantEffect("Damage")
-# damage.damage("bob", 5)
-# print(damage.bob)
+damage = InstantEffect(UUID())
 
+damage.add_name("Test Effect")
+damage.add_description("Just an effect to test out stuff")
+damage.add_effect(("damage", "health", 2))
+damage.trigger()
 
-damage.activate([["damage", "health", 2]])
+print(f"Damage:\n{damage}")

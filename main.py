@@ -7,12 +7,7 @@ class MoneyError(BaseException):
     def __init__(self, message):
         print(f"Money Error: {message}")
 
-class StaticProperty:
-  def __init__(self, func):
-    self.func = func
 
-  def __get__(self, instance, owner):
-    return self.func()
 
 
 
