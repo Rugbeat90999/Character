@@ -1,11 +1,10 @@
 from registers import *
+from LocalLibrary import *
+from commonLib import UUID, StaticProperty
 
 
 
 
-class MoneyError(BaseException):
-    def __init__(self, message):
-        print(f"Money Error: {message}")
 
 
 
@@ -331,8 +330,6 @@ charisma: {self.charisma}'''
                       raise ValueError(f"Invalid stat: {stat}")
             else:
                 raise ValueError("Not enough stat points")
-
-
 
     
     class Spells:

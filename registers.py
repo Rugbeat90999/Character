@@ -1,3 +1,4 @@
+from LocalLibrary import *
 from commonLib import UUID
 
 
@@ -11,8 +12,6 @@ class Item:
         self.name = name
         self.id = id
         self.description = description
-
-    
 
     
     class Armor():
@@ -147,15 +146,15 @@ class EffectCatagory:
           elif answer == "n":
               break
           else:
-              print("invalid answer please answer with 'y' or 'n'")
+              print("invalid answer please answer with \'y\' or \'n\'")
 
-    
+
     def add_effect(self, effect:"Effect"):
         self.effects.append(effect)
 
 
     def __str__(self) -> str:
-        return f"EffectCatagory: {self.name}"
+        return self.uuid
 
 
 class Effect:
@@ -193,7 +192,7 @@ class Effect:
         self.description = description
     
 
-    def add_catagory(self, name:str):
+    def add_catagory(self, uuid:UUID):
         getattr(EffectCatagory, "poisen")
 
     
