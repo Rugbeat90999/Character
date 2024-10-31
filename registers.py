@@ -190,7 +190,7 @@ class Effects:
     def register_effect_category(category:"EffectCategory"):
         for registered_catagory in Effects.catagories:
             registered_catagory.uuid.compare(category.uuid)
-        Effects.permanent_effects.append(category)
+        Effects.catagories.append(category)
         
 
 
@@ -445,6 +445,21 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
           self.__getattribute__(method[0])(method)
 
 
+    def release(self):
+        self.max_health = 0
+        self.max_stamina = 0
+        self.max_mana = 0
+        self.health = 0
+        self.stamina = 0
+        self.mana = 0
+        self.strength = 0
+        self.constitution = 0
+        self.agility = 0
+        self.wisdom = 0
+        self.intelligence = 0
+        self.charisma = 0
+
+
 class TemporaryEffect(Effect):
     def __init__(self, uuid:UUID):
         super().__init__(uuid)
@@ -481,7 +496,11 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
         if damage_type not in damageable:
           raise ValueError(f"{damage_type}, is not damageable stat, pick from: {damageable}")
         
-        self.__setattr__(damage_type, self.__getattribute__(damage_type) - (amount*self.time_passed))
+        time_passed = self.time_passed
+        if time_passed > self.duration:
+            time_passed -= self.duration
+        
+        self.__setattr__(damage_type, self.__getattribute__(damage_type) - (amount*time_passed))
     
 
     def weaken(self, var_tuple:tuple[str, str, int]):
@@ -520,7 +539,12 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
         if heal_type not in healable:
           raise ValueError(f"{heal_type}, is not healable stat, pick from: {healable}")
 
-        self.__setattr__(heal_type, self.__getattribute__(heal_type) + (amount*self.time_passed))
+        time_passed = self.time_passed
+
+        if time_passed > self.duration:
+            time_passed -= self.duration
+
+        self.__setattr__(heal_type, self.__getattribute__(heal_type) + (amount*time_passed))
         
 
     def boost(self, var_tuple:tuple[str, str, int]):
@@ -551,9 +575,26 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
           self.__getattribute__(method[0])(method)
     
 
-    def triggered(self, time_passed:float):
+    def hold(self, time_passed:float):
         self.duration -= time_passed
         self.time_passed = time_passed
+        for method in self.methods:
+          self.__getattribute__(method[0])(method)
+
+
+    def release(self):
+        self.max_health = 0
+        self.max_stamina = 0
+        self.max_mana = 0
+        self.health = 0
+        self.stamina = 0
+        self.mana = 0
+        self.strength = 0
+        self.constitution = 0
+        self.agility = 0
+        self.wisdom = 0
+        self.intelligence = 0
+        self.charisma = 0
 
 
     def add_time(self, amount:float):
@@ -568,6 +609,8 @@ class PermanentEffect(Effect):
     def __init__(self, uuid:UUID):
         super().__init__(uuid)
         self.__uuid = uuid
+
+        self.wereworlf = False
         self.end = False
 
 
@@ -600,9 +643,6 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
           raise ValueError(f"{damage_type}, is not a stat")
         
         self.__setattr__(damage_type, -amount)
-        if self.end:
-          self.__setattr__(damage_type, self.__getattribute__(damage_type) + amount)
-            
 
 
     def boost(self, var_tuple:tuple[str, str, int]):
@@ -639,6 +679,21 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
     def trigger(self):
         for method in self.methods:
           self.__getattribute__(method[0])(method)
+    
+    def release(self):
+        self.max_health = 0
+        self.max_stamina = 0
+        self.max_mana = 0
+        self.health = 0
+        self.stamina = 0
+        self.mana = 0
+        self.strength = 0
+        self.constitution = 0
+        self.agility = 0
+        self.wisdom = 0
+        self.intelligence = 0
+        self.charisma = 0
+        self.wereworlf = False
 
 
 
