@@ -127,7 +127,7 @@ class Action:
 class Effects:
     instant_effects = list['InstantEffect']()
     temporary_effects = list['TemporaryEffect']()
-    permanant_effects = list['PermanentEffect']()
+    permanent_effects = list['PermanentEffect']()
 
     catagories = list['EffectCategory']()
     
@@ -136,7 +136,7 @@ class Effects:
         rows = ""
         i = len(Effects.instant_effects)
         t = len(Effects.temporary_effects)
-        p = len(Effects.permanant_effects)
+        p = len(Effects.permanent_effects)
         while i > 0 or t > 0 or p > 0:
             temp = ""
             if i > 0:
@@ -150,7 +150,7 @@ class Effects:
                 temp += "                    "
             temp += "|"
             if p > 0:
-                temp += f"{Effects.permanant_effects[p-1].name}".center(20)
+                temp += f"{Effects.permanent_effects[p-1].name}".center(20)
             else:
                 temp += "                    "
             temp += "\n"
@@ -169,22 +169,29 @@ class Effects:
 
     @staticmethod
     def register_instant_effect(effect:"InstantEffect"):
-        for registered_effect in Effects.instant_effects + Effects.permanant_effects + Effects.temporary_effects:
+        for registered_effect in Effects.instant_effects + Effects.permanent_effects + Effects.temporary_effects:
             registered_effect.uuid.compare(effect.uuid)
         
         Effects.instant_effects.append(effect)
 
     @staticmethod
     def register_temporary_effect(effect:"TemporaryEffect"):
-        for registered_effect in Effects.instant_effects + Effects.permanant_effects + Effects.temporary_effects:
+        for registered_effect in Effects.instant_effects + Effects.permanent_effects + Effects.temporary_effects:
             registered_effect.uuid.compare(effect.uuid)
         Effects.temporary_effects.append(effect)
 
     @staticmethod
     def register_permanent_effect(effect:"TemporaryEffect"):
-        for registered_effect in Effects.instant_effects + Effects.permanant_effects + Effects.temporary_effects:
+        for registered_effect in Effects.instant_effects + Effects.permanent_effects + Effects.temporary_effects:
             registered_effect.uuid.compare(effect.uuid)
-        Effects.permanant_effects.append(effect)
+        Effects.permanent_effects.append(effect)
+    
+    @staticmethod
+    def register_effect_category(category:"EffectCategory"):
+        for registered_catagory in Effects.catagories:
+            registered_catagory.uuid.compare(category.uuid)
+        Effects.permanent_effects.append(category)
+        
 
 
 class EffectCategory:
@@ -198,31 +205,71 @@ class EffectCategory:
         return self.__uuid
 
 
-    def change_uuid(self, uuid:UUID):
-        answer = input("Changeing the UUID of a EffectCatagory may cause fatal errors, are you sure you want to continue? (y/n): ")
-        while True:
-          if answer == "y":
-              self.__uuid = uuid
-              break
-          elif answer == "n":
-              break
-          else:
-              print("invalid answer please answer with \'y\' or \'n\'")
+    def __str__(self):
+        instant_effects = list[InstantEffect]()
+        temporary_effects = list[TemporaryEffect]()
+        permanent_effects = list[PermanentEffect]()
+
+        print(f"instant_effects: {len(instant_effects)}")
+        for effect in self.effects:
+            if isinstance(effect, InstantEffect):
+                effect.name += "instant"
+                instant_effects.append(effect)
+            elif isinstance(effect, TemporaryEffect):
+                temporary_effects.append(effect)
+            elif isinstance(effect, PermanentEffect):
+                permanent_effects.append(effect)
+        print(f"instant_effects: {len(instant_effects)}")
+
+        rows = ""
+        i = len(instant_effects)
+        t = len(temporary_effects)
+        p = len(permanent_effects)
+        while i > 0 or t > 0 or p > 0:
+            temp = ""
+            if i > 0:
+                temp += f"{instant_effects[i-1].name}".center(20)
+            else:
+                temp += "                    "
+            temp += "|"
+            if t > 0:
+                temp += f"{temporary_effects[t-1].name}".center(20)
+            else:
+                temp += "                    "
+            temp += "|"
+            if p > 0:
+                temp += f"{permanent_effects[p-1].name}".center(20)
+            else:
+                temp += "                    "
+            temp += "\n"
+            
+            i -= 1
+            t -= 1
+            p -= 1
+            rows += temp
+
+        return f"Effect:\n"\
+               f"Instant Effects     |Temporary           |Permanent                    \n"\
+               f"                    |                    |                    \n"\
+               f"{rows}"\
+               f"                    |                    |                    "
+
 
 
     def add_effect(self, effect:"Effect"):
         self.effects.append(effect)
 
+    
 
-    def __str__(self) -> str:
-        return self.uuid
+    def register(self):
+        Effects.register_effect_category(self)
+        return self
 
 
 class Effect:
     '''
 This is a parent class and should not be used directly
     '''
-    bob = "j"
     def __init__(self, uuid:UUID):
         self.__uuid = uuid
         self.name = "N/A"
@@ -300,6 +347,7 @@ removes an added effect, you must put in the exact args in the exact order they 
                 raise ValueError(e)
         return self
     
+
     def register(self):
         if isinstance(self, InstantEffect):
             Effects.register_instant_effect(self)
@@ -310,8 +358,8 @@ removes an added effect, you must put in the exact args in the exact order they 
         else:
             print("broken")
             quit()
+        return self
       
-
 
 
 
@@ -333,7 +381,7 @@ f"{ f"\nEffects: {methods}" if methods  != [] else ""}"\
 f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
     
 
-    def __format__(self, format_spec):
+    def __format__(self, format_spec:str="name"):
         '''
         Options:\n
             \"effects\": returns a string of the effects\n
@@ -597,64 +645,58 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
 
 
 
-healing = EffectCategory(UUID("00000001-0000-7916-0000-000000000001"), "Healing")
-damaging = EffectCategory(UUID("00000001-0000-7916-0000-000000000002"), "Damaging")
+HEALING = EffectCategory(UUID("00000001-0000-7916-0000-000000000001"), "Healing").register()
+DAMAGING = EffectCategory(UUID("00000001-0000-7916-0000-000000000002"), "Damaging").register()
 
 
-InstantEffect(UUID("00000002-0000-7916-0002-000000000001")).add_name("Minor Heal").add_description("Heals 10 health").add_catagory(healing).add_effect("heal", "health", 10).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000002")).add_name("Lesser Heal").add_description("Heals 20 health").add_catagory(healing).add_effect("heal", "health", 20).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000003")).add_name("Common Heal").add_description("Heals 40 health").add_catagory(healing).add_effect("heal", "health", 40).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000004")).add_name("Greater Heal").add_description("Heals 80 health").add_catagory(healing).add_effect("heal", "health", 80).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000005")).add_name("Grand Heal").add_description("Heals 160 health").add_catagory(healing).add_effect("heal", "health", 160).register()
+InstantEffect(UUID("00000002-0000-7916-0002-000000000001")).add_name("Minor Heal").add_description("Heals 10 health").add_catagory(HEALING).add_effect("heal", "health", 10).register()
+InstantEffect(UUID("00000002-0000-7916-0002-000000000002")).add_name("Lesser Heal").add_description("Heals 20 health").add_catagory(HEALING).add_effect("heal", "health", 20).register()
+InstantEffect(UUID("00000002-0000-7916-0002-000000000003")).add_name("Common Heal").add_description("Heals 40 health").add_catagory(HEALING).add_effect("heal", "health", 40).register()
+InstantEffect(UUID("00000002-0000-7916-0002-000000000004")).add_name("Greater Heal").add_description("Heals 80 health").add_catagory(HEALING).add_effect("heal", "health", 80).register()
+InstantEffect(UUID("00000002-0000-7916-0002-000000000005")).add_name("Grand Heal").add_description("Heals 160 health").add_catagory(HEALING).add_effect("heal", "health", 160).register()
 
-InstantEffect(UUID("00000002-0000-7916-0001-000000000001")).add_name("Minor Damage").add_description("Damage health by 10").add_catagory(damaging).add_effect("damage", "health", 10).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000002")).add_name("Lesser Damage").add_description("Damage health by 20").add_catagory(damaging).add_effect("damage", "health", 20).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000003")).add_name("Common Damage").add_description("Damage health by 40").add_catagory(damaging).add_effect("damage", "health", 40).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000004")).add_name("Greater Damage").add_description("Damage health by 80").add_catagory(damaging).add_effect("damage", "health", 80).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000005")).add_name("Grand Damage").add_description("Damage health by 160").add_catagory(damaging).add_effect("damage", "health", 160).register()
-
-
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000001"))).add_name("Minor Poisen").add_description("Damage health by 1 every second").add_catagory(damaging).add_effect("poison", "health", 1).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000002"))).add_name("Lesser Poisen").add_description("Damage health by 2 every second").add_catagory(damaging).add_effect("poison", "health", 2).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000003"))).add_name("Common Poisen").add_description("Damage health by 4 every second").add_catagory(damaging).add_effect("poison", "health", 4).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000004"))).add_name("Greater Poisen").add_description("Damage health by 8 every second").add_catagory(damaging).add_effect("poison", "health", 8).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000005"))).add_name("Grand Poisen").add_description("Damage health by 16 every second").add_catagory(damaging).add_effect("poison", "health", 16).register()
-
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000001"))).add_name("Minor Weaken").add_description("Decrease max health by 10 for the duration").add_catagory(damaging).add_effect("weaken", "max_health", 10).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000002"))).add_name("Lesser Weaken").add_description("Decrease max health by 20 for the duration").add_catagory(damaging).add_effect("weaken", "max_health", 20).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000003"))).add_name("Common Weaken").add_description("Decrease max health by 40 for the duration").add_catagory(damaging).add_effect("weaken", "max_health", 40).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000004"))).add_name("Greater Weaken").add_description("Decrease max health by 80 for the duration").add_catagory(damaging).add_effect("weaken", "max_health", 80).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000005"))).add_name("Grand Weaken").add_description("Decrease max health by 160 for the duration").add_catagory(damaging).add_effect("weaken", "max_health", 160).register()
-
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000001"))).add_name("Minor Regen").add_description("Regens 1 health every second").add_catagory(healing).add_effect("regen", "health", 1).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000002"))).add_name("Lesser Regen").add_description("Regens 2 health every second").add_catagory(healing).add_effect("regen", "health", 2).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000003"))).add_name("Common Regen").add_description("Regens 4 health every second").add_catagory(healing).add_effect("regen", "health", 4).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000004"))).add_name("Greater Regen").add_description("Regens 8 health every second").add_catagory(healing).add_effect("regen", "health", 8).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000005"))).add_name("Grand Regen").add_description("Regens 16 health every second").add_catagory(healing).add_effect("regen", "health", 16).register()
-
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000001"))).add_name("Minor Boost").add_description("Boosts max health by 10 for the duration").add_catagory(healing).add_effect("boost", "health", 10).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000002"))).add_name("Lesser Boost").add_description("Boosts max health by 20 for the duration").add_catagory(healing).add_effect("boost", "health", 20).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000003"))).add_name("Common Boost").add_description("Boosts max health by 40 for the duration").add_catagory(healing).add_effect("boost", "health", 40).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000004"))).add_name("Greater Boost").add_description("Boosts max health by 80 for the duration").add_catagory(healing).add_effect("boost", "health", 80).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000005"))).add_name("Grand Boost").add_description("Boosts max health by 160 for the duration").add_catagory(healing).add_effect("boost", "health", 160).register()
+InstantEffect(UUID("00000002-0000-7916-0001-000000000001")).add_name("Minor Damage").add_description("Damage health by 10").add_catagory(DAMAGING).add_effect("damage", "health", 10).register()
+InstantEffect(UUID("00000002-0000-7916-0001-000000000002")).add_name("Lesser Damage").add_description("Damage health by 20").add_catagory(DAMAGING).add_effect("damage", "health", 20).register()
+InstantEffect(UUID("00000002-0000-7916-0001-000000000003")).add_name("Common Damage").add_description("Damage health by 40").add_catagory(DAMAGING).add_effect("damage", "health", 40).register()
+InstantEffect(UUID("00000002-0000-7916-0001-000000000004")).add_name("Greater Damage").add_description("Damage health by 80").add_catagory(DAMAGING).add_effect("damage", "health", 80).register()
+InstantEffect(UUID("00000002-0000-7916-0001-000000000005")).add_name("Grand Damage").add_description("Damage health by 160").add_catagory(DAMAGING).add_effect("damage", "health", 160).register()
 
 
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000001"))).add_name("Minor Cripple").add_description("Decrease max health by 10").add_catagory(damaging).add_effect("weaken", "max_health", 10).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000002"))).add_name("Lesser Cripple").add_description("Decrease max health by 20").add_catagory(damaging).add_effect("weaken", "max_health", 20).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000003"))).add_name("Common Cripple").add_description("Decrease max health by 40").add_catagory(damaging).add_effect("weaken", "max_health", 40).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000004"))).add_name("Greater Cripple").add_description("Decrease max health by 80").add_catagory(damaging).add_effect("weaken", "max_health", 80).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000005"))).add_name("Grand Cripple").add_description("Decrease max health by 160").add_catagory(damaging).add_effect("weaken", "max_health", 160).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000001"))).add_name("Minor Poisen").add_description("Damage health by 1 every second").add_catagory(DAMAGING).add_effect("poison", "health", 1).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000002"))).add_name("Lesser Poisen").add_description("Damage health by 2 every second").add_catagory(DAMAGING).add_effect("poison", "health", 2).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000003"))).add_name("Common Poisen").add_description("Damage health by 4 every second").add_catagory(DAMAGING).add_effect("poison", "health", 4).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000004"))).add_name("Greater Poisen").add_description("Damage health by 8 every second").add_catagory(DAMAGING).add_effect("poison", "health", 8).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000005"))).add_name("Grand Poisen").add_description("Damage health by 16 every second").add_catagory(DAMAGING).add_effect("poison", "health", 16).register()
 
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000001"))).add_name("Minor Boost").add_description("Boosts max health by 10").add_catagory(healing).add_effect("boost", "health", 10).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000002"))).add_name("Lesser Boost").add_description("Boosts max health by 20").add_catagory(healing).add_effect("boost", "health", 20).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000003"))).add_name("Common Boost").add_description("Boosts max health by 40").add_catagory(healing).add_effect("boost", "health", 40).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000004"))).add_name("Greater Boost").add_description("Boosts max health by 80").add_catagory(healing).add_effect("boost", "health", 80).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000005"))).add_name("Grand Boost").add_description("Boosts max health by 160").add_catagory(healing).add_effect("boost", "health", 160).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000001"))).add_name("Minor Weaken").add_description("Decrease max health by 10 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 10).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000002"))).add_name("Lesser Weaken").add_description("Decrease max health by 20 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 20).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000003"))).add_name("Common Weaken").add_description("Decrease max health by 40 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 40).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000004"))).add_name("Greater Weaken").add_description("Decrease max health by 80 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 80).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000005"))).add_name("Grand Weaken").add_description("Decrease max health by 160 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 160).register()
 
-PermanentEffect(UUID(("00000004-0002-7916-0001-000000000001"))).add_name("Lycanthropey").add_description("Changes the effected into a werewolf").add_catagory(healing).add_effect("lycanthropey").register()
+TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000001"))).add_name("Minor Regen").add_description("Regens 1 health every second").add_catagory(HEALING).add_effect("regen", "health", 1).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000002"))).add_name("Lesser Regen").add_description("Regens 2 health every second").add_catagory(HEALING).add_effect("regen", "health", 2).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000003"))).add_name("Common Regen").add_description("Regens 4 health every second").add_catagory(HEALING).add_effect("regen", "health", 4).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000004"))).add_name("Greater Regen").add_description("Regens 8 health every second").add_catagory(HEALING).add_effect("regen", "health", 8).register()
+TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000005"))).add_name("Grand Regen").add_description("Regens 16 health every second").add_catagory(HEALING).add_effect("regen", "health", 16).register()
+
+TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000001"))).add_name("Minor Boost").add_description("Boosts max health by 10 for the duration").add_catagory(HEALING).add_effect("boost", "health", 10).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000002"))).add_name("Lesser Boost").add_description("Boosts max health by 20 for the duration").add_catagory(HEALING).add_effect("boost", "health", 20).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000003"))).add_name("Common Boost").add_description("Boosts max health by 40 for the duration").add_catagory(HEALING).add_effect("boost", "health", 40).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000004"))).add_name("Greater Boost").add_description("Boosts max health by 80 for the duration").add_catagory(HEALING).add_effect("boost", "health", 80).register()
+TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000005"))).add_name("Grand Boost").add_description("Boosts max health by 160 for the duration").add_catagory(HEALING).add_effect("boost", "health", 160).register()
 
 
+PermanentEffect(UUID(("00000004-0001-7916-0001-000000000001"))).add_name("Minor Cripple").add_description("Decrease max health by 10").add_catagory(DAMAGING).add_effect("weaken", "max_health", 10).register()
+PermanentEffect(UUID(("00000004-0001-7916-0001-000000000002"))).add_name("Lesser Cripple").add_description("Decrease max health by 20").add_catagory(DAMAGING).add_effect("weaken", "max_health", 20).register()
+PermanentEffect(UUID(("00000004-0001-7916-0001-000000000003"))).add_name("Common Cripple").add_description("Decrease max health by 40").add_catagory(DAMAGING).add_effect("weaken", "max_health", 40).register()
+PermanentEffect(UUID(("00000004-0001-7916-0001-000000000004"))).add_name("Greater Cripple").add_description("Decrease max health by 80").add_catagory(DAMAGING).add_effect("weaken", "max_health", 80).register()
+PermanentEffect(UUID(("00000004-0001-7916-0001-000000000005"))).add_name("Grand Cripple").add_description("Decrease max health by 160").add_catagory(DAMAGING).add_effect("weaken", "max_health", 160).register()
 
+PermanentEffect(UUID(("00000004-0001-7916-0002-000000000001"))).add_name("Minor Boost").add_description("Boosts max health by 10").add_catagory(HEALING).add_effect("boost", "health", 10).register()
+PermanentEffect(UUID(("00000004-0001-7916-0002-000000000002"))).add_name("Lesser Boost").add_description("Boosts max health by 20").add_catagory(HEALING).add_effect("boost", "health", 20).register()
+PermanentEffect(UUID(("00000004-0001-7916-0002-000000000003"))).add_name("Common Boost").add_description("Boosts max health by 40").add_catagory(HEALING).add_effect("boost", "health", 40).register()
+PermanentEffect(UUID(("00000004-0001-7916-0002-000000000004"))).add_name("Greater Boost").add_description("Boosts max health by 80").add_catagory(HEALING).add_effect("boost", "health", 80).register()
+PermanentEffect(UUID(("00000004-0001-7916-0002-000000000005"))).add_name("Grand Boost").add_description("Boosts max health by 160").add_catagory(HEALING).add_effect("boost", "health", 160).register()
 
-print(Effects.__str__())
-print()
+PermanentEffect(UUID(("00000004-0002-7916-0001-000000000001"))).add_name("Lycanthropey").add_description("Changes the effected into a werewolf").add_catagory(HEALING).add_effect("lycanthropey").register()
