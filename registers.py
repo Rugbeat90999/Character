@@ -1,6 +1,7 @@
 from LocalLibrary import *
-from commonLib import UUID, NotUniqueUUIDError
-# from main import Character
+from CommonLib.classes import UUID, NotUniqueUUIDError
+from CommonLib.functional_classes import staticproperty, staticstr
+
 
 
 
@@ -113,6 +114,8 @@ class Item:
 
 
 
+
+
 class Action:
     def __init__(self, action_type:str, cost:int):
         section_types = ["spell", "attack"]
@@ -124,33 +127,126 @@ class Action:
 
 
 
-class Effects:
-    instant_effects = list['InstantEffect']()
-    temporary_effects = list['TemporaryEffect']()
-    permanent_effects = list['PermanentEffect']()
 
-    catagories = list['EffectCategory']()
+
+class Effects(metaclass=staticstr):
+    class Instant(metaclass=staticstr):
+        all = list['InstantEffect']()
+        registered = list[str]()
+
+        
+        def __str__() -> str:
+            rows = ""
+            for effect in Effects.Instant.all:
+                rows += f"{effect}\n"
+            rows = rows.removesuffix("\n")
+            return f"Instant Effects:\n"\
+                   f"{rows}"
+        
+
+        
+
+        @staticmethod
+        def register(effect:"InstantEffect", registrey_name:str):
+            for registered_effect in Effects.Instant.all + Effects.Permanent.all + Effects.Temporary.all:
+                registered_effect.uuid.compare(effect.uuid)
+
+            Effects.Instant.all.append(effect)
+            Effects.Instant.registered.append(effect.registry_name)
+            setattr(Effects.Instant, registrey_name, effect)
+
+
+    class Temporary(metaclass=staticstr):
+        all = list['TemporaryEffect']()
+        registered = list[str]()
+
+
+        def __str__() -> str:
+            rows = ""
+            for effect in Effects.Instant.all:
+                rows += f"{effect}\n"
+            rows = rows.removesuffix("\n")
+            return f"Temporary Effects:\n"\
+                   f"{rows}"
+
+
+        @staticmethod
+        def register(effect:"TemporaryEffect", registrey_name:str):
+            for registered_effect in Effects.Instant.all + Effects.Permanent.all + Effects.Temporary.all:
+                registered_effect.uuid.compare(effect.uuid)
+            Effects.Temporary.all.append(effect)
+            Effects.Temporary.registered.append(effect.registry_name)
+            setattr(Effects.Temporary, registrey_name, effect)
     
-    @staticmethod
+
+    class Permanent(metaclass=staticstr):
+        all = list['PermanentEffect']()
+        registered = list[str]()
+      
+
+        def __str__() -> str:
+            rows = ""
+            for effect in Effects.Instant.all:
+                rows += f"{effect}\n"
+            rows = rows.removesuffix("\n")
+            return f"Permanent Effects:\n"\
+                   f"{rows}"
+
+        @staticmethod
+        def register(effect:"TemporaryEffect", registrey_name:str):
+            for registered_effect in Effects.Instant.all + Effects.Permanent.all + Effects.Temporary.all:
+                registered_effect.uuid.compare(effect.uuid)
+            Effects.Permanent.all.append(effect)
+            Effects.Permanent.registered.append(effect.registry_name)
+            setattr(Effects.Permanent, registrey_name, effect)
+    
+
+    class Catagories(metaclass=staticstr):
+        all = list['EffectCategory']()
+        registered = list[str]()
+        
+
+        def __str__() -> str:
+            rows = ""
+            for catagories in Effects.Catagories.all:
+                rows += f"{catagories}\n"
+            rows = rows.removesuffix("\n")
+            return f"Effects Catagories:\n"\
+                   f"{rows}"
+    
+        @staticmethod
+        def register(category:"EffectCategory", registrey_name:str):
+            for registered_catagory in Effects.Catagories.all:
+                registered_catagory.uuid.compare(category.uuid)
+            Effects.Catagories.all.append(category)
+            Effects.Catagories.registered.append(category.registry_name)
+            setattr(Effects.Catagories, registrey_name, category)
+
+
+    @staticproperty
+    def all_effects():
+        return Effects.Instant.all + Effects.Temporary.all + Effects.Permanent.all
+
+
     def __str__():
         rows = ""
-        i = len(Effects.instant_effects)
-        t = len(Effects.temporary_effects)
-        p = len(Effects.permanent_effects)
+        i = len(Effects.Instant.all)
+        t = len(Effects.Temporary.all)
+        p = len(Effects.Permanent.all)
         while i > 0 or t > 0 or p > 0:
             temp = ""
             if i > 0:
-                temp += f"{Effects.instant_effects[i-1].name}".center(20)
+                temp += f"{Effects.Instant.all[i-1].name}".center(20)
             else:
                 temp += "                    "
             temp += "|"
             if t > 0:
-                temp += f"{Effects.temporary_effects[t-1].name}".center(20)
+                temp += f"{Effects.Temporary.all[t-1].name}".center(20)
             else:
                 temp += "                    "
             temp += "|"
             if p > 0:
-                temp += f"{Effects.permanent_effects[p-1].name}".center(20)
+                temp += f"{Effects.Permanent.all[p-1].name}".center(20)
             else:
                 temp += "                    "
             temp += "\n"
@@ -167,42 +263,21 @@ class Effects:
 
 
 
-    @staticmethod
-    def register_instant_effect(effect:"InstantEffect"):
-        for registered_effect in Effects.instant_effects + Effects.permanent_effects + Effects.temporary_effects:
-            registered_effect.uuid.compare(effect.uuid)
-        
-        Effects.instant_effects.append(effect)
-
-    @staticmethod
-    def register_temporary_effect(effect:"TemporaryEffect"):
-        for registered_effect in Effects.instant_effects + Effects.permanent_effects + Effects.temporary_effects:
-            registered_effect.uuid.compare(effect.uuid)
-        Effects.temporary_effects.append(effect)
-
-    @staticmethod
-    def register_permanent_effect(effect:"TemporaryEffect"):
-        for registered_effect in Effects.instant_effects + Effects.permanent_effects + Effects.temporary_effects:
-            registered_effect.uuid.compare(effect.uuid)
-        Effects.permanent_effects.append(effect)
-    
-    @staticmethod
-    def register_effect_category(category:"EffectCategory"):
-        for registered_catagory in Effects.catagories:
-            registered_catagory.uuid.compare(category.uuid)
-        Effects.catagories.append(category)
-        
-
 
 class EffectCategory:
     def __init__(self, uuid:UUID, name:str="N/A"):
         self.__uuid = uuid
         self.name = name
+        self.__registry_name = None
         self.effects = list[Effect]()
     
     @property
     def uuid(self):
         return self.__uuid
+    
+    @property
+    def registry_name(self):
+        return self.__registry_name
 
 
     def __str__(self):
@@ -210,7 +285,6 @@ class EffectCategory:
         temporary_effects = list[TemporaryEffect]()
         permanent_effects = list[PermanentEffect]()
 
-        print(f"instant_effects: {len(instant_effects)}")
         for effect in self.effects:
             if isinstance(effect, InstantEffect):
                 effect.name += "instant"
@@ -219,7 +293,6 @@ class EffectCategory:
                 temporary_effects.append(effect)
             elif isinstance(effect, PermanentEffect):
                 permanent_effects.append(effect)
-        print(f"instant_effects: {len(instant_effects)}")
 
         rows = ""
         i = len(instant_effects)
@@ -248,11 +321,38 @@ class EffectCategory:
             p -= 1
             rows += temp
 
-        return f"Effect:\n"\
+        return f"Effects in catagory: {self.name}:\n"\
                f"Instant Effects     |Temporary           |Permanent                    \n"\
                f"                    |                    |                    \n"\
                f"{rows}"\
                f"                    |                    |                    "
+    
+
+    def __format__(self, format_spec="default"):
+        '''
+        Options:\n
+            \"effects\": returns a string of the effects\n
+            \"catagories\": returns a string of the catagories\n
+            \"description\": returns a string of the description\n
+            \"name\": returns a string of the name\n
+            \"uuid\": returns a string of the uuid
+
+            does name by default
+        '''
+        match format_spec:
+            case "effects":
+                return ", ".join(self.methods)
+            case "catagories":
+                return ", ".join(self.catagory)
+            case "description":
+                return self.description
+            case "name":
+                return self.name
+            case "uuid":
+                return self.uuid
+            case _:
+                return self.name
+        
 
 
 
@@ -261,8 +361,9 @@ class EffectCategory:
 
     
 
-    def register(self):
-        Effects.register_effect_category(self)
+    def register(self, registrey_name:str):
+        self.__registry_name = registrey_name
+        Effects.Catagories.register(self, registrey_name)
         return self
 
 
@@ -274,6 +375,7 @@ This is a parent class and should not be used directly
         self.__uuid = uuid
         self.name = "N/A"
         self.description = "N/A"
+        self.__regitry_name = uuid.alphabetic_version
         self.methods = list[tuple[str, str, int]]()
         self.catagory = list[str]()
         
@@ -295,22 +397,22 @@ This is a parent class and should not be used directly
         return self.__uuid
     
 
-    def add_name(self, name:str) -> "Effect":
+    def add_name(self, name:str):
         self.name = name
         return self
 
 
-    def add_description(self, description:str) -> "Effect":
+    def add_description(self, description:str):
         self.description = description
         return self
 
 
-    def add_catagory(self, category:EffectCategory) -> "Effect":
+    def add_catagory(self, category:EffectCategory):
         getattr(category, "add_effect")(self)
         return self
 
 
-    def add_effect(self, *args) -> "Effect":
+    def add_effect(self, *args):
         '''
 Adds a new effect to the Effect based on the args given.
 the first argument is the function, everything after is passed into the function
@@ -334,7 +436,7 @@ Current options for permanent effects:
         return self
 
 
-    def remove_effect(self, *args) -> "Effect":
+    def remove_effect(self, *args):
         '''
 removes an added effect, you must put in the exact args in the exact order they were added in for it to work
         '''
@@ -346,20 +448,7 @@ removes an added effect, you must put in the exact args in the exact order they 
             else:
                 raise ValueError(e)
         return self
-    
 
-    def register(self):
-        if isinstance(self, InstantEffect):
-            Effects.register_instant_effect(self)
-        elif isinstance(self, TemporaryEffect):
-            Effects.register_temporary_effect(self)
-        elif isinstance(self, PermanentEffect):
-            Effects.register_permanent_effect(self)
-        else:
-            print("broken")
-            quit()
-        return self
-      
 
 
 
@@ -367,6 +456,11 @@ class InstantEffect(Effect):
     def __init__(self, uuid:UUID):
         super().__init__(uuid)
         self.__uuid = uuid
+        self.__regitry_name = uuid.alphabetic_version
+    
+    @property
+    def registry_name(self) -> str:
+        return self.__regitry_name
     
 
     def __str__(self) -> str:
@@ -389,17 +483,29 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
             \"description\": returns a string of the description\n
             \"name\": returns a string of the name\n
             \"uuid\": returns a string of the uuid
+
+            does name by default
         '''
-        if format_spec == "effects":
-            return ", ".join(self.methods)
-        elif format_spec == "catagories":
-            return ", ".join(self.catagory)
-        elif format_spec == "description":
-            return self.description
-        elif format_spec == "name":
-            return self.name
-        elif format_spec == "uuid":
-            return self.uuid
+        match format_spec:
+            case "effects":
+                return ", ".join(self.methods)
+            case "catagories":
+                return ", ".join(self.catagory)
+            case "description":
+                return self.description
+            case "name":
+                return self.name
+            case "uuid":
+                return self.uuid
+            case _:
+                return self.name
+      
+
+    def register(self, registry_name:str):
+        if registry_name in Effects.Instant.registered:
+            raise ValueError(f"Duplicate registry name \"{registry_name}\"")
+        self.__regitry_name = registry_name
+        Effects.Instant.register(self, registry_name)
 
 
     def damage(self, var_tuple:tuple[str, str, int]):
@@ -464,8 +570,13 @@ class TemporaryEffect(Effect):
     def __init__(self, uuid:UUID):
         super().__init__(uuid)
         self.__uuid = uuid
+        self.__regitry_name = uuid.alphabetic_version
         self.duration = 0.0
         self.time_passed = .0
+    
+    @property
+    def registry_name(self) -> str:
+        return self.__regitry_name
 
 
     def __str__(self) -> str:
@@ -478,6 +589,39 @@ f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
 f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
 f"{ f"\nEffects: {methods}" if methods  != [] else ""}"\
 f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
+
+
+    def __format__(self, format_spec:str="name"):
+        '''
+        Options:\n
+            \"effects\": returns a string of the effects\n
+            \"catagories\": returns a string of the catagories\n
+            \"description\": returns a string of the description\n
+            \"name\": returns a string of the name\n
+            \"uuid\": returns a string of the uuid
+
+            does name by default
+        '''
+        match format_spec:
+            case "effects":
+                return ", ".join(self.methods)
+            case "catagories":
+                return ", ".join(self.catagory)
+            case "description":
+                return self.description
+            case "name":
+                return self.name
+            case "uuid":
+                return self.uuid
+            case _:
+                return self.name
+
+
+    def register(self, registry_name:str):
+        if registry_name in Effects.Temporary.registered:
+            raise ValueError(f"Duplicate registry name \"{registry_name}\"")
+        self.__regitry_name = registry_name
+        Effects.Temporary.register(self, registry_name)
 
 
     def poison(self, var_tuple:tuple[str, str, int]):
@@ -609,9 +753,14 @@ class PermanentEffect(Effect):
     def __init__(self, uuid:UUID):
         super().__init__(uuid)
         self.__uuid = uuid
+        self.__regitry_name = uuid
 
         self.wereworlf = False
         self.end = False
+    
+    @property
+    def registry_name(self) -> str:
+        return self.__regitry_name
 
 
     def __str__(self):
@@ -620,10 +769,43 @@ class PermanentEffect(Effect):
             methods += f"{method[0]}, "
         methods = methods.removesuffix(", ")
         return f"UUID: {self.__uuid}"\
-f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
-f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
-f"{ f"\nEffects: {methods}" if methods  != [] else ""}"\
-f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
+               f"{ f"\nName: {self.name}" if self.name != "" else ""}"\
+               f"{ f"\nDescription: {self.description}" if self.description != "" else ""}"\
+               f"{ f"\nEffects: {methods}" if methods  != [] else ""}"\
+               f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
+
+
+    def __format__(self, format_spec:str="name"):
+        '''
+        Options:\n
+            \"effects\": returns a string of the effects\n
+            \"catagories\": returns a string of the catagories\n
+            \"description\": returns a string of the description\n
+            \"name\": returns a string of the name\n
+            \"uuid\": returns a string of the uuid
+
+            does name by default
+        '''
+        match format_spec:
+            case "effects":
+                return ", ".join(self.methods)
+            case "catagories":
+                return ", ".join(self.catagory)
+            case "description":
+                return self.description
+            case "name":
+                return self.name
+            case "uuid":
+                return self.uuid
+            case _:
+                return self.name
+
+
+    def register(self, registry_name:str):
+        if registry_name in Effects.Permanent.registered:
+            raise ValueError(f"Duplicate registry name \"{registry_name}\"")
+        self.__regitry_name = registry_name
+        Effects.Permanent.register(self, registry_name)
     
 
     def weaken(self, var_tuple:tuple[str, str, int]):
@@ -698,60 +880,3 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
 
 
 
-
-
-HEALING = EffectCategory(UUID("00000001-0000-7916-0000-000000000001"), "Healing").register()
-DAMAGING = EffectCategory(UUID("00000001-0000-7916-0000-000000000002"), "Damaging").register()
-
-
-InstantEffect(UUID("00000002-0000-7916-0002-000000000001")).add_name("Minor Heal").add_description("Heals 10 health").add_catagory(HEALING).add_effect("heal", "health", 10).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000002")).add_name("Lesser Heal").add_description("Heals 20 health").add_catagory(HEALING).add_effect("heal", "health", 20).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000003")).add_name("Common Heal").add_description("Heals 40 health").add_catagory(HEALING).add_effect("heal", "health", 40).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000004")).add_name("Greater Heal").add_description("Heals 80 health").add_catagory(HEALING).add_effect("heal", "health", 80).register()
-InstantEffect(UUID("00000002-0000-7916-0002-000000000005")).add_name("Grand Heal").add_description("Heals 160 health").add_catagory(HEALING).add_effect("heal", "health", 160).register()
-
-InstantEffect(UUID("00000002-0000-7916-0001-000000000001")).add_name("Minor Damage").add_description("Damage health by 10").add_catagory(DAMAGING).add_effect("damage", "health", 10).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000002")).add_name("Lesser Damage").add_description("Damage health by 20").add_catagory(DAMAGING).add_effect("damage", "health", 20).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000003")).add_name("Common Damage").add_description("Damage health by 40").add_catagory(DAMAGING).add_effect("damage", "health", 40).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000004")).add_name("Greater Damage").add_description("Damage health by 80").add_catagory(DAMAGING).add_effect("damage", "health", 80).register()
-InstantEffect(UUID("00000002-0000-7916-0001-000000000005")).add_name("Grand Damage").add_description("Damage health by 160").add_catagory(DAMAGING).add_effect("damage", "health", 160).register()
-
-
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000001"))).add_name("Minor Poisen").add_description("Damage health by 1 every second").add_catagory(DAMAGING).add_effect("poison", "health", 1).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000002"))).add_name("Lesser Poisen").add_description("Damage health by 2 every second").add_catagory(DAMAGING).add_effect("poison", "health", 2).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000003"))).add_name("Common Poisen").add_description("Damage health by 4 every second").add_catagory(DAMAGING).add_effect("poison", "health", 4).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000004"))).add_name("Greater Poisen").add_description("Damage health by 8 every second").add_catagory(DAMAGING).add_effect("poison", "health", 8).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0001-000000000005"))).add_name("Grand Poisen").add_description("Damage health by 16 every second").add_catagory(DAMAGING).add_effect("poison", "health", 16).register()
-
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000001"))).add_name("Minor Weaken").add_description("Decrease max health by 10 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 10).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000002"))).add_name("Lesser Weaken").add_description("Decrease max health by 20 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 20).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000003"))).add_name("Common Weaken").add_description("Decrease max health by 40 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 40).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000004"))).add_name("Greater Weaken").add_description("Decrease max health by 80 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 80).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0001-000000000005"))).add_name("Grand Weaken").add_description("Decrease max health by 160 for the duration").add_catagory(DAMAGING).add_effect("weaken", "max_health", 160).register()
-
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000001"))).add_name("Minor Regen").add_description("Regens 1 health every second").add_catagory(HEALING).add_effect("regen", "health", 1).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000002"))).add_name("Lesser Regen").add_description("Regens 2 health every second").add_catagory(HEALING).add_effect("regen", "health", 2).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000003"))).add_name("Common Regen").add_description("Regens 4 health every second").add_catagory(HEALING).add_effect("regen", "health", 4).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000004"))).add_name("Greater Regen").add_description("Regens 8 health every second").add_catagory(HEALING).add_effect("regen", "health", 8).register()
-TemporaryEffect(UUID(("00000003-0001-7916-0002-000000000005"))).add_name("Grand Regen").add_description("Regens 16 health every second").add_catagory(HEALING).add_effect("regen", "health", 16).register()
-
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000001"))).add_name("Minor Boost").add_description("Boosts max health by 10 for the duration").add_catagory(HEALING).add_effect("boost", "health", 10).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000002"))).add_name("Lesser Boost").add_description("Boosts max health by 20 for the duration").add_catagory(HEALING).add_effect("boost", "health", 20).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000003"))).add_name("Common Boost").add_description("Boosts max health by 40 for the duration").add_catagory(HEALING).add_effect("boost", "health", 40).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000004"))).add_name("Greater Boost").add_description("Boosts max health by 80 for the duration").add_catagory(HEALING).add_effect("boost", "health", 80).register()
-TemporaryEffect(UUID(("00000003-0002-7916-0002-000000000005"))).add_name("Grand Boost").add_description("Boosts max health by 160 for the duration").add_catagory(HEALING).add_effect("boost", "health", 160).register()
-
-
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000001"))).add_name("Minor Cripple").add_description("Decrease max health by 10").add_catagory(DAMAGING).add_effect("weaken", "max_health", 10).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000002"))).add_name("Lesser Cripple").add_description("Decrease max health by 20").add_catagory(DAMAGING).add_effect("weaken", "max_health", 20).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000003"))).add_name("Common Cripple").add_description("Decrease max health by 40").add_catagory(DAMAGING).add_effect("weaken", "max_health", 40).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000004"))).add_name("Greater Cripple").add_description("Decrease max health by 80").add_catagory(DAMAGING).add_effect("weaken", "max_health", 80).register()
-PermanentEffect(UUID(("00000004-0001-7916-0001-000000000005"))).add_name("Grand Cripple").add_description("Decrease max health by 160").add_catagory(DAMAGING).add_effect("weaken", "max_health", 160).register()
-
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000001"))).add_name("Minor Boost").add_description("Boosts max health by 10").add_catagory(HEALING).add_effect("boost", "health", 10).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000002"))).add_name("Lesser Boost").add_description("Boosts max health by 20").add_catagory(HEALING).add_effect("boost", "health", 20).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000003"))).add_name("Common Boost").add_description("Boosts max health by 40").add_catagory(HEALING).add_effect("boost", "health", 40).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000004"))).add_name("Greater Boost").add_description("Boosts max health by 80").add_catagory(HEALING).add_effect("boost", "health", 80).register()
-PermanentEffect(UUID(("00000004-0001-7916-0002-000000000005"))).add_name("Grand Boost").add_description("Boosts max health by 160").add_catagory(HEALING).add_effect("boost", "health", 160).register()
-
-PermanentEffect(UUID(("00000004-0002-7916-0001-000000000001"))).add_name("Lycanthropey").add_description("Changes the effected into a werewolf").add_catagory(HEALING).add_effect("lycanthropey").register()

@@ -1,6 +1,8 @@
 from registers import *
 from LocalLibrary import *
-from commonLib import UUID, StaticProperty
+from CommonLib.classes import UUID 
+
+from registries import effect_registeries
 
 
 
@@ -656,8 +658,7 @@ charisma: {self.charisma}'''
               def __init__(self):
                   self.__credit = 0
               
-              @StaticProperty
-              @staticmethod
+              @staticproperty
               def coin_types():
                   return ["kings_coin", "big_platinum", "platinum", "big_silver", "big_gold", "gold", "silver", "big_copper", "copper"]
                   
@@ -929,12 +930,4 @@ Big Platinum: {self.big_platinum}'''
 
 char = Character()
 
-# print(Effects.temporary_effects[0])
-
-print(char.status.health)
-char.status.effects.temporary.add_effect(Effects.temporary_effects[0])
-char.status.effects.temporary.trigger(60)
-print()
-# print(Effects.temporary_effects[0].health)
-print()
-print(char.status.health)
+print(Effects.Instant.registered)

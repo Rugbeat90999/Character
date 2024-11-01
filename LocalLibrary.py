@@ -1,4 +1,4 @@
-from commonLib import UUID
+from CommonLib.classes import UUID
 
 class MoneyError(BaseException):
     def __init__(self, message):
