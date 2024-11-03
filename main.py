@@ -1,12 +1,8 @@
 from registers import *
 from LocalLibrary import *
-from commonLib import UUID, StaticProperty
+from CommonLib.classes import UUID 
 
-
-
-
-
-
+from registries import effect_registeries
 
 
 
@@ -23,11 +19,16 @@ class Character:
      
     class Status:
         def __init__(self):
+            self.effects = self.Effects()
+
             self.__xp = 0
             self.__stat_points = 0
             self.__health_points = 0
             self.__mana_points = 0
             self.__stamina_points = 0
+            self.__health = 100
+            self.__mana = 100
+            self.__stamina = 100
             self.__strength_points = 0
             self.__constitution_points = 0
             self.__agility_points = 0
@@ -64,7 +65,7 @@ class Character:
 
             points += int((self.constitution * 2 + self.agility * 1.5 + self.strength) // 4 - 1)
 
-            return base + points
+            return base + points + self.effects.max_health
 
         @property
         def max_mana(self) -> int:
@@ -86,15 +87,30 @@ class Character:
 
         @property
         def health(self) -> int:
-            return 100
+            if self.__health > self.max_health:
+                self.__health = self.max_health
+
+            self.__health += self.effects.health
+
+            return self.__health
          
         @property
         def mana(self) -> int:
-            return 100
+            if self.__stamina > self.max_stamina:
+                self.__stamina = self.max_stamina
+
+            self.__mana += self.effects.mana
+
+            return self.__stamina
 
         @property
         def stamina(self) -> int:
-            return 100
+            if self.__mana > self.max_mana:
+                self.__mana = self.max_mana
+            
+            self.__stamina += self.effects.stamina
+
+            return self.__mana
 
         @property
         def strength(self) -> int:
@@ -129,7 +145,7 @@ class Character:
             return base + points
 
         @property
-        def intelegence(self) -> int:
+        def intelligence(self) -> int:
             base = 10
             points = 0
             points += self.__intelligence_points + self.level
@@ -162,47 +178,56 @@ class Character:
             @property
             def max_health(self) -> int:
                 return self.instant.max_health + self.temporary.max_health + self.permanent.max_health
+            
             @property
             def max_mana(self) -> int:
                 return self.instant.max_health + self.temporary.max_mana + self.permanent.max_mana
+            
             @property
             def max_stamina(self) -> int:
                 return self.instant.max_health + self.temporary.max_stamina + self.permanent.max_stamina
+            
             @property
             def health(self) -> int:
                 return self.instant.max_health + self.temporary.health + self.permanent.health
+            
             @property
             def mana(self) -> int:
                 return self.instant.max_health + self.temporary.mana + self.permanent.mana
+            
             @property
             def stamina(self) -> int:
                 return self.instant.max_health + self.temporary.stamina + self.permanent.stamina
+            
             @property
             def strength(self) -> int:
                 return self.instant.max_health + self.temporary.strength + self.permanent.strength
+            
             @property
-            def constatution(self) -> int:
-                return self.instant.max_health + self.temporary.constatution + self.permanent.constatution
+            def constitution(self) -> int:
+                return self.instant.max_health + self.temporary.constitution + self.permanent.constitution
+            
             @property
             def agility(self) -> int:
                 return self.instant.max_health + self.temporary.agility + self.permanent.agility
+            
             @property
             def wisdom(self) -> int:
                 return self.instant.max_health + self.temporary.wisdom + self.permanent.wisdom
+            
             @property
-            def intelegence(self) -> int:
-                return self.instant.max_health + self.temporary.intelegence + self.permanent.intelegence
+            def intelligence(self) -> int:
+                return self.instant.max_health + self.temporary.intelligence + self.permanent.intelligence
+            
             @property
             def charisma(self) -> int:
                 return self.instant.max_health + self.temporary.charisma + self.permanent.charisma
 
 
-
-
             class Instant:
                 '''
-                Instant effects activate once then dissapear.
-                i.e. intant health
+                Instant effects activate once, then dissapear.
+                i.e. instant health
                 '''
                 def __init__(self):
                     self.max_health = 0
@@ -212,13 +237,63 @@ class Character:
                     self.mana = 0
                     self.stamina = 0
                     self.strength = 0
-                    self.constatution = 0
+                    self.constitution = 0
                     self.agility = 0
                     self.wisdom = 0
-                    self.intelegence = 0
+                    self.intelligence = 0
                     self.charisma = 0
 
-                    self.current = []
+                    self.current = list[PermanentEffect]()
+                
+                def __str__(self):
+                    return f"max_health: {self.max_health}\n"\
+                    f"max_mana: {self.max_mana}\n"\
+                    f"max_stamina: {self.max_stamina}\n"\
+                    f"health: {self.health}\n"\
+                    f"mana: {self.mana}\n"\
+                    f"stamina: {self.stamina}\n"\
+                    f"strength: {self.strength}\n"\
+                    f"constitution: {self.constitution}\n"\
+                    f"agility: {self.agility}\n"\
+                    f"wisdom: {self.wisdom }\n"\
+                    f"intelligence: {self.intelligence}\n"\
+                    f"charisma: {self.charisma}"
+                
+
+                def add_effect(self, effect: PermanentEffect):
+                    self.current.append(effect)
+                
+                
+                def trigger(self):
+                    for effect in self.current:
+                        effect.trigger()
+                        self.max_health += effect.max_health
+                        self.max_mana += effect.max_mana
+                        self.max_stamina += effect.max_stamina
+                        self.health += effect.health
+                        self.mana += effect.mana
+                        self.stamina += effect.stamina
+                        self.strength += effect.strength
+                        self.constitution += effect.constitution
+                        self.agility += effect.agility
+                        self.wisdom += effect.wisdom
+                        self.intelligence += effect.intelligence
+                        self.charisma += effect.charisma
+                
+
+                def release(self):
+                    self.max_health = 0
+                    self.max_mana = 0
+                    self.max_stamina = 0
+                    self.health = 0
+                    self.mana = 0
+                    self.stamina = 0
+                    self.strength = 0
+                    self.constitution = 0
+                    self.agility = 0
+                    self.wisdom = 0
+                    self.intelligence = 0
+                    self.charisma = 0
                 
 
             class Temporary:
@@ -234,13 +309,71 @@ class Character:
                     self.mana = 0
                     self.stamina = 0
                     self.strength = 0
-                    self.constatution = 0
+                    self.constitution = 0
                     self.agility = 0
                     self.wisdom = 0
-                    self.intelegence = 0
+                    self.intelligence = 0
                     self.charisma = 0
 
-                    self.current = []
+                    self.current = list[TemporaryEffect]()
+                
+                def __str__(self):
+                    return f"max_health: {self.max_health}\n"\
+                    f"max_mana: {self.max_mana}\n"\
+                    f"max_stamina: {self.max_stamina}\n"\
+                    f"health: {self.health}\n"\
+                    f"mana: {self.mana}\n"\
+                    f"stamina: {self.stamina}\n"\
+                    f"strength: {self.strength}\n"\
+                    f"constitution: {self.constitution}\n"\
+                    f"agility: {self.agility}\n"\
+                    f"wisdom: {self.wisdom }\n"\
+                    f"intelligence: {self.intelligence}\n"\
+                    f"charisma: {self.charisma}"
+                
+
+                def add_effect(self, effect: TemporaryEffect):
+                    self.current.append(effect)
+                
+                
+                def trigger(self, duration: int):
+                    for effect in self.current:
+                        effect.trigger(duration)
+                        self.max_health += effect.max_health
+                        self.max_mana += effect.max_mana
+                        self.max_stamina += effect.max_stamina
+                        self.health += effect.health
+                        self.mana += effect.mana
+                        self.stamina += effect.stamina
+                        self.strength += effect.strength
+                        self.constitution += effect.constitution
+                        self.agility += effect.agility
+                        self.wisdom += effect.wisdom
+                        self.intelligence += effect.intelligence
+                        self.charisma += effect.charisma
+                
+
+                def hold(self, time_passed: int):
+                    for effect in self.current:
+                        effect.hold(time_passed)
+                        self.max_health += effect.max_health
+                        self.max_mana += effect.max_mana
+                        self.max_stamina += effect.max_stamina
+                        self.health += effect.health
+                        self.mana += effect.mana
+                        self.stamina += effect.stamina
+                        self.strength += effect.strength
+                        self.constitution += effect.constitution
+                        self.agility += effect.agility
+                        self.wisdom += effect.wisdom
+                        self.intelligence += effect.intelligence
+                        self.charisma += effect.charisma
+                
+
+                def release(self):
+                    for effect in self.current:
+                        effect.release()
+                
 
             
             class Permanent:
@@ -256,13 +389,83 @@ class Character:
                     self.mana = 0
                     self.stamina = 0
                     self.strength = 0
-                    self.constatution = 0
+                    self.constitution = 0
                     self.agility = 0
                     self.wisdom = 0
-                    self.intelegence = 0
+                    self.intelligence = 0
                     self.charisma = 0
 
-                    self.current = []
+                    self.current = list[PermanentEffect]()
+                
+                
+                def __str__(self):
+                    return f"max_health: {self.max_health}\n"\
+                    f"max_mana: {self.max_mana}\n"\
+                    f"max_stamina: {self.max_stamina}\n"\
+                    f"health: {self.health}\n"\
+                    f"mana: {self.mana}\n"\
+                    f"stamina: {self.stamina}\n"\
+                    f"strength: {self.strength}\n"\
+                    f"constitution: {self.constitution}\n"\
+                    f"agility: {self.agility}\n"\
+                    f"wisdom: {self.wisdom }\n"\
+                    f"intelligence: {self.intelligence}\n"\
+                    f"charisma: {self.charisma}"
+                
+
+                def add_effect(self, effect: PermanentEffect):
+                    self.current.append(effect)
+                
+                
+                def trigger(self):
+                    for effect in self.current:
+                        effect.trigger()
+                        self.max_health += effect.max_health
+                        self.max_mana += effect.max_mana
+                        self.max_stamina += effect.max_stamina
+                        self.health += effect.health
+                        self.mana += effect.mana
+                        self.stamina += effect.stamina
+                        self.strength += effect.strength
+                        self.constitution += effect.constitution
+                        self.agility += effect.agility
+                        self.wisdom += effect.wisdom
+                        self.intelligence += effect.intelligence
+                        self.charisma += effect.charisma
+                
+
+                def release(self):
+                    for effect in self.current:
+                        effect.release()
+
+
+            def __str__(self):
+                return f"max_health: {self.max_health}\n"\
+                f"max_mana: {self.max_mana}\n"\
+                f"max_stamina: {self.max_stamina}\n"\
+                f"health: {self.health}\n"\
+                f"mana: {self.mana}\n"\
+                f"stamina: {self.stamina}\n"\
+                f"strength: {self.strength}\n"\
+                f"constitution: {self.constitution}\n"\
+                f"agility: {self.agility}\n"\
+                f"wisdom: {self.wisdom }\n"\
+                f"intelligence: {self.intelligence}\n"\
+                f"charisma: {self.charisma}"
+
+
+            def trigger(self):
+                self.instant.trigger()
+                self.temporary.trigger()
+                self.permanent.trigger()
+            
+            def hold(self):
+                self.temporary.hold()
+            
+            def release(self):
+                self.instant.release()
+                self.temporary.release()
+                self.permanent.release()
 
 
 
@@ -276,7 +479,7 @@ strength: {self.strength}
 constitution: {self.constitution}
 agility: {self.agility}
 wisdom: {self.wisdom}
-intelegence: {self.intelegence}
+intelligence: {self.intelligence}
 charisma: {self.charisma}'''
             
             return out
@@ -455,8 +658,7 @@ charisma: {self.charisma}'''
               def __init__(self):
                   self.__credit = 0
               
-              @StaticProperty
-              @staticmethod
+              @staticproperty
               def coin_types():
                   return ["kings_coin", "big_platinum", "platinum", "big_silver", "big_gold", "gold", "silver", "big_copper", "copper"]
                   
@@ -728,22 +930,4 @@ Big Platinum: {self.big_platinum}'''
 
 char = Character()
 
-
-print(char.status)
-print(f"stat_points: {char.status.stat_points}")
-print()
-# char.status.add_xp(300)
-char.status.add_stat_points(500)
-char.status.upgrade_stat(5, "constitution")
-char.status.upgrade_stat(4, "agility")
-char.status.upgrade_stat(8, "strength")
-char.status.upgrade_stat(2, "health")
-print(char.status)
-print(f"stat_points: {char.status.stat_points}")
-# print()
-# char.status.upgrade_stat(2, "health")
-# char.status.upgrade_stat(2, "strength")
-# char.status.upgrade_stat(2, "agility")
-# char.status.upgrade_stat(1, "constitution")
-# print(char.status)
-# print(f"stat_points: {char.status.stat_points}")
+print(Effects.Instant.registered)
