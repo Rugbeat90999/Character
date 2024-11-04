@@ -31,9 +31,9 @@ class Items(metaclass=staticstr):
 class Item:
     def __init__(self, uuid:UUID):
         self.__uuid = uuid
+        self.__regitry_name = uuid.alphabetic_version
         self.name = "N/A"
         self.description = "N/A"
-        self.__regitry_name = uuid.alphabetic_version
         self.value = 0
         self.weight = 0
 
