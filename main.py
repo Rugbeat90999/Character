@@ -2,9 +2,9 @@ from registers import *
 from LocalLibrary import *
 from CommonLib.classes import UUID 
 
-from registries import effect_registeries
+from registries import location_registeries
 from registries import item_registeries
-from registries import body_location_registeries
+from registries import effect_registeries
 
 
 
@@ -928,27 +928,5 @@ Big Platinum: {self.big_platinum}'''
 
 
 
-def check_attr(class_dict:dict):
-  li = []
-  class_dict = dict(class_dict)
-  class_dict.pop('__module__')
-  class_dict.pop('__dict__')
-  class_dict.pop('__weakref__')
-  class_dict.pop('__doc__')
-  class_dict.pop('__str__')
-  class_dict.pop('register')
-  class_dict.pop('all')
-  class_dict.pop('registered')
-  class_dict.pop('names')
-  class_dict.pop('uuids')
-  class_dict.pop('unregister')
-  for name in class_dict:
-    li.append(name)
-  return li
-
 char = Character()
-# print(Items.Usables.registered)
-print(Items.Usables.IRON_SWORD)
-UsableItem(UUID()).register("bob")
-# print(Items.Usables.bob)
-# print(Items.Usables.registered)
+print(BodyLocations.registered)

@@ -107,7 +107,7 @@ class UUIDCounter:
       self.number = 0
       self.set_signature(int(self.signature)+1)
     return self
-
+    
 
 
 
@@ -118,20 +118,39 @@ def UUID_search(uuid:UUID, search_list:list):
   return -1
 
 
-def check_attr(class_dict:dict):
+def check_attr(class_dict:dict) -> list[str]:
   li = []
   class_dict = dict(class_dict)
-  class_dict.pop('__module__')
-  class_dict.pop('__dict__')
-  class_dict.pop('__weakref__')
-  class_dict.pop('__doc__')
-  class_dict.pop('__str__')
-  class_dict.pop('register')
-  class_dict.pop('all')
-  class_dict.pop('registered')
-  class_dict.pop('names')
-  class_dict.pop('uuids')
-  class_dict.pop('unregister')
+  pop_list = ["register", "all", "registered", "names", "uuids", "unregister"]
+  for di in class_dict:
+    if di[0] == '_':
+      pop_list.append(di)
+
+  for p in pop_list:
+    try:
+      class_dict.pop(p)
+    except KeyError:
+      pass
   for name in class_dict:
     li.append(name)
   return li
+
+
+def registry_error_check(registry_name:str, current_registry_list:list[str]) -> None:
+  if not registry_name:
+    raise RegistryError(f"Registry name cannot be empty.")
+  
+  if registry_name[0] == "_":
+    raise RegistryError(f"{registry_name}, registry name cannot start with '_'.")
+  
+  if registry_name[0].isnumeric():
+    raise RegistryError(f"{registry_name}, registry name cannot start with a number.")
+  
+  reg = registry_name.split("_")
+  for i in reg:
+    if not i.isalnum():
+      raise RegistryError(f"{registry_name}, registry name cannot contain special characters.")
+
+  for i in current_registry_list:
+      if i == registry_name:
+        raise RegistryError(f"\"{registry_name}\", is not unique.")
