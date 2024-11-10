@@ -2,9 +2,7 @@ from registers import *
 from LocalLibrary import *
 from CommonLib.classes import UUID 
 
-from registries import location_registeries
-from registries import item_registeries
-from registries import effect_registeries
+from registries import *
 
 
 
@@ -927,6 +925,4 @@ Big Platinum: {self.big_platinum}'''
 
 
 
-
 char = Character()
-print(BodyLocations.registered)

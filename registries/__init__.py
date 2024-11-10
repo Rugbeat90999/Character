@@ -1,0 +1,3 @@
+from registries import location_registeries
+from registries import item_registeries
+from registries import effect_registeries

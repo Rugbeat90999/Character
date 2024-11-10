@@ -18,6 +18,13 @@ class RegistryError(BaseException):
 
 
 
+class EquipmentError(BaseException):
+  def __init__(self, message):
+    print(f"EquipmentError: {message}")
+
+
+
+
 class Fraction:
   '''
   only for looks, not usable in math functions
@@ -107,15 +114,8 @@ class UUIDCounter:
       self.number = 0
       self.set_signature(int(self.signature)+1)
     return self
-    
 
 
-
-def UUID_search(uuid:UUID, search_list:list):
-  for index in range(len(search_list)):
-    if uuid == search_list[index].uuid:
-      return index
-  return -1
 
 
 def check_attr(class_dict:dict) -> list[str]:
@@ -137,6 +137,13 @@ def check_attr(class_dict:dict) -> list[str]:
 
 
 def registry_error_check(registry_name:str, current_registry_list:list[str]) -> None:
+  if not isinstance(current_registry_list, list):
+    raise TypeError("Registry must be a list.")
+
+  for i in current_registry_list:
+    if not isinstance(i, str):
+      raise TypeError("Registry must be a list of strings.")
+
   if not registry_name:
     raise RegistryError(f"Registry name cannot be empty.")
   
