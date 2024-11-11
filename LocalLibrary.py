@@ -1,6 +1,6 @@
 from CommonLib.classes import UUID
 from CommonLib.functional_classes import staticproperty
-
+from registers import Parts
 
 
 
@@ -136,13 +136,9 @@ def check_attr(class_dict:dict) -> list[str]:
   return li
 
 
-def registry_error_check(registry_name:str, current_registry_list:list[str]) -> None:
-  if not isinstance(current_registry_list, list):
+def registry_error_check(registry_name:str, current_registry:"Parts") -> None:
+  if not isinstance(current_registry, Parts):
     raise TypeError("Registry must be a list.")
-
-  for i in current_registry_list:
-    if not isinstance(i, str):
-      raise TypeError("Registry must be a list of strings.")
 
   if not registry_name:
     raise RegistryError(f"Registry name cannot be empty.")
@@ -158,6 +154,6 @@ def registry_error_check(registry_name:str, current_registry_list:list[str]) -> 
     if not i.isalnum():
       raise RegistryError(f"{registry_name}, registry name cannot contain special characters.")
 
-  for i in current_registry_list:
+  for i in current_registry.registered:
       if i == registry_name:
         raise RegistryError(f"\"{registry_name}\", is not unique.")

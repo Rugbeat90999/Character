@@ -1,4 +1,4 @@
-from registers import BodyPart, GripperPart
+from registers import BodyPart, Gripper
 
 
 
@@ -41,5 +41,5 @@ LEFT_THIGH = BodyPart().set_name("Left Thigh Holster").register("LEFT_THIGH")
 
 
 
-HAND_1 = GripperPart().set_name("Right Hand").register("HAND_1")
-HAND_2 = GripperPart().set_name("Left Hand").register("HAND_2")
+HAND_1 = Gripper().set_name("Right Hand").register("HAND_1")
+HAND_2 = Gripper().set_name("Left Hand").register("HAND_2")

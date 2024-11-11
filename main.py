@@ -3,6 +3,7 @@ from LocalLibrary import *
 from CommonLib.classes import UUID 
 
 from registries import *
+from registers import BodyPart, Gripper, Parts, PartCategory
 
 
 
@@ -560,94 +561,45 @@ charisma: {self.charisma}'''
     def __init__(self):
       self.stash = self.Stash()
       self.equipment = self.Equipment()
-    
-    
+
     class Equipment:
-      '''
-      Anything that can be worn or used
-      '''
       def __init__(self):
-        self.armor = self.Armor()
-        self.weapons = self.Weapons()
-        self.clothes = self.Clothes()
-        self.trinkets = self.Trinkets()
-        self.tools = self.Tools()
-
-      
-      class Armor:
-        def __init__(self):
-          self.head = None
-          self.under_head = None
-          self.body = None
-          self.under_body = None
-          self.legs = None
-          self.under_legs = None
-          self.feet = None
-          self.under_feet = None
-          self.hands = None
-          self.under_hands = None
-          self.stored = None
-
-      
-      class Clothes:
-        def __init__(self):
-          self.hat = None
-          self.shirt = None
-          self.bra = None
-          self.pants = None
-          self.underwear = None
-          self.leggings = None
-          self.socks = None
-          self.shoes = None
-          self.stored = None
-        
-      
-      class Trinkets:
-        def __init__(self):
-          self.right_glove = None
-          self.left_glove = None
-          self.right_wrist = None
-          self.left_wrist = None
-          self.right_ankle = None
-          self.left_ankle = None
-          self.right_biscep = None
-          self.left_biscep = None
-          self.right_thigh = None
-          self.left_thigh = None
-          self.right_ear = None
-          self.left_ear = None
-          self.eyes = None
-          self.neck = None
-          self.finger1 = None
-          self.finger2 = None
-          self.finger3 = None
-          self.finger4 = None
-          self.finger5 = None
-          self.finger6 = None
-          self.finger7 = None
-          self.finger8 = None
-          self.finger9 = None
-          self.finger10 = None
-          self.stored = None
-
-      
-      class Weapons:
-        def __init__(self):
-          self.stored = []
-          self.bow = None
-          self.right_hip = None
-          self.left_hip = None
-          self.back_back = None
-          self.left_back = None
-          self.shield = None
+        self.grippers = list[Gripper]()
+        self.body_parts = list[BodyPart]()
 
 
-      class Tools:
-        def __init__(self):
-          self.active = None
-          self.stored = []
-    
-    
+      def add_gripper(self, gripper:Gripper):
+        if not isinstance(gripper, Gripper):
+          raise ValueError(f"gripper must be a Gripper, not {type(gripper)}")
+        self.grippers.append(gripper)
+        return self
+
+
+      def remove_gripper(self, gripper:Gripper):
+        if not isinstance(gripper, Gripper):
+          raise ValueError(f"gripper must be a Gripper, not {type(gripper)}")
+        if gripper not in self.grippers:
+          raise ValueError(f"This character does not have the gripper {gripper}")
+        self.grippers.remove(gripper)
+        return self
+
+
+      def add_body_part(self, body_part:BodyPart):
+        if not isinstance(body_part, BodyPart):
+          raise ValueError(f"body_part must be a BodyPart, not {type(body_part)}")
+        self.body_parts.append(body_part)
+        return self
+
+
+      def remove_gripper(self, body_part:BodyPart):
+        if not isinstance(body_part, BodyPart):
+          raise ValueError(f"gripper must be a Gripper, not {type(body_part)}")
+        if body_part not in self.grippers:
+          raise ValueError(f"This character does not have the body part {body_part}")
+        self.grippers.remove(body_part)
+        return self
+
+
     class Stash:
       def __init__(self):
         self.general = list[Item]()
@@ -908,7 +860,7 @@ Big Platinum: {self.big_platinum}'''
     def __init__(self):
       self.name = ""
       self.age = 0
-      self.wieght = 0
+      self.weight = 0
       self.height = 0
       self.lore = ""
       self.gender = ""
@@ -923,3 +875,10 @@ Big Platinum: {self.big_platinum}'''
 char = Character()
 
 
+char.inventory.equipment.add_gripper(Gripper().set_name("Left Hand").register("LEFT_HAND"))
+char.inventory.equipment.add_gripper(Gripper().set_name("Right Hand").register("RIGHT_HAND"))
+char.inventory.equipment.add_gripper(Gripper().set_name("Right Hand").register("RIGHT_HAND"))
+for i in range(9):
+  char.inventory.equipment.add_gripper(Gripper().set_name(f"Tail {i+1}"))
+
+char.inventory.equipment.add_body_part(BodyPart().set_name(""))

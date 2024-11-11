@@ -7,24 +7,24 @@ global STAT_LIST
 STAT_LIST = ["xp", "stat_points", "health_points", "mana_points", "stamina_points", "health", "mana", "stamina", "strength_points", "constitution_points", "agility_points", "wisdom_points", "intelligence_points", "charisma_points"]
 
 
-class Parts(metaclass=staticstr):
-  @staticproperty
+class Parts:
+  @property
   def all() -> list["Part"]:
     return Parts.Grippers.all + Parts.Bodies.all
 
-  @staticproperty
+  @property
   def registered() -> list[str]:
     return Parts.Grippers.registered + Parts.Bodies.registered
 
-  @staticproperty
+  @property
   def names() -> list[str]:
     return Parts.Grippers.names + Parts.Bodies.names
 
 
-  class Bodies(metaclass=staticstr):
+  class Bodies:
     @staticproperty
-    def all() -> list["GripperPart"]:
-      li = list["GripperPart"]()
+    def all() -> list["BodyPart"]:
+      li = list["BodyPart"]()
       for regis in Parts.Bodies.registered:
         li.append(getattr(Parts.Bodies, regis))
       return li
@@ -57,8 +57,8 @@ class Parts(metaclass=staticstr):
 
   class Grippers(metaclass=staticstr):
     @staticproperty
-    def all() -> list["GripperPart"]:
-      li = []
+    def all() -> list["Gripper"]:
+      li = list["Gripper"]
       for regis in Parts.Grippers.registered:
         li.append(getattr(Parts.Grippers, regis))
       return li
@@ -78,12 +78,12 @@ class Parts(metaclass=staticstr):
       rows = ""
       for name in Parts.Grippers.names:
         rows += f"\n {name}"
-      return f"Gripper Parts:{rows}"
+      return f"Grippers:{rows}"
 
 
     @staticmethod
-    def unregister(gripper:"GripperPart"):
-      if not isinstance(gripper, GripperPart):
+    def unregister(gripper:"Gripper"):
+      if not isinstance(gripper, Gripper):
         raise ValueError(f"{gripper}, is not a GripperPart instance")
       if not gripper in Parts.Grippers.all:
         raise ValueError(f"{gripper}, is not a registered gripper part")
@@ -92,8 +92,8 @@ class Parts(metaclass=staticstr):
 
   class Categories(metaclass=staticstr):
     @staticproperty
-    def all() -> list["GripperPart"]:
-      li = list["GripperPart"]()
+    def all() -> list["Gripper"]:
+      li = list["Gripper"]()
       for regis in Parts.Categories.registered:
         li.append(getattr(Parts.Categories, regis))
       return li
@@ -173,7 +173,7 @@ class PartCategory:
   def grippers(self):
     this = list[str]()
     for part_registry_name in self.reg_names:
-      if isinstance(getattr(Parts.Grippers, part_registry_name), GripperPart):
+      if isinstance(getattr(Parts.Grippers, part_registry_name), Gripper):
         this.append(part_registry_name)
     return this
 
@@ -183,7 +183,7 @@ class PartCategory:
     for part_registry_name in self.reg_names:
       if isinstance(getattr(Parts.Bodies, part_registry_name), BodyPart):
         continue
-      elif isinstance(getattr(Parts.Grippers, part_registry_name), GripperPart):
+      elif isinstance(getattr(Parts.Grippers, part_registry_name), Gripper):
         continue
       else:
         this.append(part_registry_name)
@@ -357,13 +357,13 @@ class BodyPart(Part):
     return self
 
   def register(self, registry_name:str):
-    registry_error_check(registry_name, Parts.registered)
+    registry_error_check(registry_name, Parts.Bodies)
     self.__registry_name = registry_name
     setattr(Parts.Bodies, registry_name, self)
     return self
 
 
-class GripperPart(Part):
+class Gripper(Part):
   def __init__(self):
     super().__init__()
   
@@ -374,19 +374,17 @@ class GripperPart(Part):
 
   def equip(self, item: "UsableItem"):
     if not isinstance(item, UsableItem):
-      raise TypeError(f"{item}, is not a usable item")
+      raise TypeError(f"{item}, is not a UsableItem")
     self.item = item
     return self
 
 
   def register(self, registry_name:str):
-    registry_error_check(registry_name, Parts.registered)
+    registry_error_check(registry_name, Parts.Grippers)
     self.__registry_name = registry_name
     setattr(Parts.Grippers, registry_name, self)
     return self
 
-
-# class Action:
 
 
 
