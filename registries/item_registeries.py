@@ -1,5 +1,5 @@
 from registers import ItemCategory, WearableItem, UsableItem, GeneralItem
-from registries.location_registeries import Parts
+from registries.part_registeries import Parts
 
 
 

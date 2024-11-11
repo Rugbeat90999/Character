@@ -3,8 +3,8 @@ from CommonLib.classes import UUID, NotUniqueUUIDError
 from CommonLib.functional_classes import staticproperty, staticstr
 
 
-
-
+global STAT_LIST
+STAT_LIST = ["xp", "stat_points", "health_points", "mana_points", "stamina_points", "health", "mana", "stamina", "strength_points", "constitution_points", "agility_points", "wisdom_points", "intelligence_points", "charisma_points"]
 
 
 class Parts(metaclass=staticstr):
@@ -335,17 +335,19 @@ class Part:
 class BodyPart(Part):
   def __init__(self):
     super().__init__()
-    self.bludgeonable = False
+    self.dextarity = False
 
   @property
   def registry_name(self) -> str:
     return self.__registry_name
   
 
-  def set_bludonable(self, bludgeonable:bool):
-    if not isinstance(bludgeonable, bool):
-      raise TypeError(f"{bludgeonable}, is not a boolean")
-    self.bludgeonable = bludgeonable
+  def set_dextarity_of_part(self, dextarity:int):
+    if not isinstance(dextarity, int):
+      raise TypeError(f"{dextarity}, should be an int not a {type(dextarity)}")
+    if dextarity < 0:
+      raise ValueError("Dextarity must be a positive integer.")
+    self.dextarity = dextarity
     return self
 
   def equip(self, item: "WearableItem"):
@@ -1987,3 +1989,207 @@ class PermanentEffect(Effect):
     self.intelligence = 0
     self.charisma = 0
     self.wereworlf = False
+
+
+
+class Locations:
+  def __init__(self):
+    pass
+
+
+
+class Actions:
+  def __init__(self, name: str, description: str = "N/A"):
+    if not isinstance(name, str):
+      raise TypeError(f"Name must be a string, not {type(name)}")
+    if not isinstance(description, str):
+      raise TypeError(f"Description must be a string, not {type(description)}")
+    setattr(self.__class__, name, self)
+
+    self.name = name
+    self.description = description
+
+
+  @property
+  def registered(self) -> list["str"]:
+    return check_attr(self.__dict__)
+
+  @property
+  def all(self) -> list["Action"]:
+    li = []
+    for registered in self.registered:
+      li.append(getattr(self, registered))
+    return li
+
+  @property
+  def names(self) -> str:
+    li = list[str]
+    for registered in self.registered:
+      li.append(getattr(self, registered).name)
+    return li
+
+  def __str__(self):
+    return "add Actions string"
+
+
+
+class ActionCategory:
+  pass
+
+
+class Action:
+  def __init__(self):
+    self.__registry_name = UUID().alphabetic_version
+    self.name = "N/A"
+    self.description = "N/A"
+
+
+    self.xp = 0
+    self.stat = 0
+    self.health = 0
+    self.mana = 0
+    self.stamina = 0
+    self.health = 0
+    self.mana = 0
+    self.stamina = 0
+    self.strength = 0
+    self.constitution = 0
+    self.agility = 0
+    self.wisdom = 0
+    self.intelligence = 0
+    self.charisma = 0
+
+  @property
+  def registry_name(self) -> str:
+    return self.__registry_name
+
+
+  def __str__(self):
+    return f"Action: {self.name}. placeholder"
+
+
+
+  def set_stat_cost(self, value:int, stat:str):
+    if not isinstance(value, int):
+      raise TypeError(f"Value must be an integer, not {type(value)}")
+    if not isinstance(stat, str):
+      raise TypeError(f"Req stat must be a string, not {type(stat)}")
+    if stat not in STAT_LIST:
+      raise ValueError(f"Invalid stat \"{stat}\". Stat must be one of {",".join(STAT_LIST)}")
+    self.req_stat = stat
+    self.req_stat_value = value
+    return self
+
+
+
+  def set_name(self, name:str):
+    if not isinstance(name, str):
+      raise TypeError(f"Name must be a string, not {type(name)}")
+    self.name = name
+    return self
+
+
+  def set_description(self, description:str):
+    if not isinstance(description, str):
+      raise TypeError(f"Description must be a string, not {type(description)}")
+    self.description = description
+    return self
+
+
+  def set_req_stat(self, value:int, req_stat:str):
+    if not isinstance(value, int):
+      raise TypeError(f"Value must be an integer, not {type(value)}")
+    if not isinstance(req_stat, str):
+      raise TypeError(f"Req stat must be a string, not {type(req_stat)}")
+    if req_stat not in STAT_LIST:
+      raise ValueError(f"Invalid stat {req_stat}. Stat must be one of {",".join(STAT_LIST)}")
+    self.req_stat = req_stat
+    self.req_stat_value = value
+    return self
+
+
+  def register(self, registry_name:str, location:Actions):
+    check_attr(location.__dict__)
+    if registry_name in location.registered:
+      raise RegistryError(f"The registry name {registry_name} is already in use.")
+    setattr(location, registry_name, self)
+    return self
+
+
+
+class Use(Action):
+  def __init__(self):
+    super().__init__()
+    self.to_use = None
+    self.use_on = None
+  
+
+  def set_to_use(self, value):
+    if not isinstance(value, Item | BodyPart):
+      raise TypeError(f"To use must be a string, not {type(value)}")
+    self.to_use = value
+    return self
+
+
+  def set_use_on(self, value):
+    if not isinstance(value, Item | BodyPart | "Character"): # type: ignore
+      raise TypeError(f"Use on must be a string, not {type(value)}")
+    self.use_on = value
+    return self
+
+
+  def register(self, registry_name):
+    return super().register(registry_name, Action)
+
+
+class Move(Action):
+  def __init__(self):
+    super().__init__()
+    self.destination = None
+    self.distance = 0
+    self.resistance = 0
+    self.move_type = "distance"
+
+
+  def set_destination(self, destination:Locations):
+    if not isinstance(destination, Locations):
+      raise TypeError(f"Destination must be a Locations, not {type(destination)}")
+    self.destination = destination
+    return self
+
+
+  def set_distance(self, distance:int):
+    if not isinstance(distance, int):
+      raise TypeError(f"Distance must be an integer, not {type(distance)}")
+    if distance < 0:
+      raise ValueError("Distance must be a non-negative integer.")
+    self.distance = distance
+    return self
+  
+  def set_resistance(self, resistance:int):
+    if not isinstance(resistance, int):
+      raise TypeError(f"Resistance must be an integer, not {type(resistance)}")
+    if resistance < 0:
+      raise ValueError("Resistance must be a non-negative integer.")
+    self.resistance = resistance
+    return self
+  
+
+  def set_move_type(self, move_type:str):
+    '''
+    Options:
+
+    \n  \"distance\"
+    \n  \"location\"
+    '''
+    if not isinstance(move_type, str):
+      raise TypeError(f"move_type must be a string, not {type(move_type)}")
+    if move_type not in ["distance", "destination"]:
+      raise ValueError("Invalid move_type")
+    self.move_type = move_type
+    return self
+
+
+  def register(self, registry_name):
+    super().register(registry_name, Action)
+    return self

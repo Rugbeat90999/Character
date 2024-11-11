@@ -15,6 +15,7 @@ class Character:
     self.skills = self.Skills()
     self.passives = self.Passives()
     self.inventory = self.Inventory()
+    self.info = self.Info()
    
    
   class Status:
@@ -905,24 +906,20 @@ Big Platinum: {self.big_platinum}'''
     This will contain all the flavor text and lore for the character
     '''
     def __init__(self):
-      pass
-    
-    class Meta:
-      '''
-      This will contain info such as name, age, birth date, and birth place.
-      '''
-      def __init__(self):
-        pass
-    
-    
-    class Physical:
-      '''
-      This will contain info such as height, weight, and eye color.
-      '''
-      def __init__(self):
-        pass
+      self.name = ""
+      self.age = 0
+      self.wieght = 0
+      self.height = 0
+      self.lore = ""
+      self.gender = ""
+      self.race = ""
+      self.class_name = ""
+      self.alignment = ""
+      self.background = ""
 
 
 
 
 char = Character()
+
+
