@@ -1,13 +1,24 @@
 from LocalLibrary import *
 from CommonLib.classes import UUID, NotUniqueUUIDError
 from CommonLib.functional_classes import staticproperty, staticstr
-
+from typing import overload
 
 global STAT_LIST
 STAT_LIST = ["xp", "stat_points", "health_points", "mana_points", "stamina_points", "health", "mana", "stamina", "strength_points", "constitution_points", "agility_points", "wisdom_points", "intelligence_points", "charisma_points"]
 
+class Registry:
+  def __init__(self, name: str):
+    if not isinstance(name, str):
+      raise ValueError(f"Name must be a string, not {type(name)}.")
+    self.name = name
 
-class Parts:
+
+class Parts(Registry):
+  def __init__(self, name: str):
+    super().__init__(name)
+    self.grippers = self.Grippers()
+    self.bodies = self.Bodies()
+
   @property
   def all() -> list["Part"]:
     return Parts.Grippers.all + Parts.Bodies.all
@@ -21,133 +32,173 @@ class Parts:
     return Parts.Grippers.names + Parts.Bodies.names
 
 
-  class Bodies:
-    @staticproperty
-    def all() -> list["BodyPart"]:
+  class Bodies(Registry):
+    def __init__(self):
+      pass
+
+    @property
+    def all(self) -> list["BodyPart"]:
       li = list["BodyPart"]()
-      for regis in Parts.Bodies.registered:
-        li.append(getattr(Parts.Bodies, regis))
+      for regis in self.registered:
+        li.append(getattr(self, regis))
       return li
 
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Parts.Bodies.__dict__)
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
 
-    @staticproperty
-    def names() -> list[str]:
+    @property
+    def names(self) -> list[str]:
       li = list[str]()
-      for body_part in Parts.Bodies.all:
+      for body_part in self.all:
         li.append(body_part.name)
       return li
 
-    def __str__():
+    def __str__(self):
       rows = ""
-      for name in Parts.Bodies.names:
+      for name in self.names:
         rows += f"\n {name}"
       return f"Body Parts:{rows}"
 
 
-    @staticmethod
-    def unregister(body_part: "BodyPart"):
-      if not body_part in Parts.all:
+    def unregister(self, body_part: "BodyPart"):
+      if not body_part in self.all:
         raise ValueError(f"{body_part}, is not a registered body part")
 
       delattr(Parts, body_part.registry_name)
 
 
-  class Grippers(metaclass=staticstr):
-    @staticproperty
-    def all() -> list["Gripper"]:
+  class Grippers(Registry):
+    def __init__(self):
+      pass
+    @property
+    def all(self) -> list["Gripper"]:
       li = list["Gripper"]
-      for regis in Parts.Grippers.registered:
-        li.append(getattr(Parts.Grippers, regis))
+      for regis in self.registered:
+        li.append(getattr(self, regis))
       return li
 
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Parts.Grippers.__dict__)
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
 
-    @staticproperty
-    def names() -> list[str]:
+    @property
+    def names(self) -> list[str]:
       li = list[str]()
-      for body_part in Parts.Grippers.all:
+      for body_part in self.all:
         li.append(body_part.name)
       return li
 
-    def __str__():
+
+    def __str__(self):
       rows = ""
-      for name in Parts.Grippers.names:
+      for name in self.names:
         rows += f"\n {name}"
       return f"Grippers:{rows}"
 
 
-    @staticmethod
-    def unregister(gripper:"Gripper"):
+
+    def unregister(self, gripper:"Gripper"):
       if not isinstance(gripper, Gripper):
         raise ValueError(f"{gripper}, is not a GripperPart instance")
-      if not gripper in Parts.Grippers.all:
+      if not gripper in self.all:
         raise ValueError(f"{gripper}, is not a registered gripper part")
-      delattr(Parts.Grippers, gripper.registry_name)
+      delattr(self, gripper.registry_name)
 
 
-  class Categories(metaclass=staticstr):
-    @staticproperty
-    def all() -> list["Gripper"]:
+  class Categories:
+    @property
+    def all(self) -> list["Gripper"]:
       li = list["Gripper"]()
-      for regis in Parts.Categories.registered:
-        li.append(getattr(Parts.Categories, regis))
+      for regis in self.registered:
+        li.append(getattr(self, regis))
       return li
 
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Parts.Categories.__dict__)
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
 
-    @staticproperty
-    def names() -> list[str]:
+    @property
+    def names(self) -> list[str]:
       li = list[str]()
-      for body_part in Parts.Categories.all:
+      for body_part in self.all:
         li.append(body_part.name)
       return li
 
-    @staticmethod
-    def unregister(body_part: "BodyPart"):
-      if not body_part in Parts.Categories.all:
+    def unregister(self, body_part: "BodyPart"):
+      if not body_part in self.all:
         raise ValueError(f"{body_part}, is not a registered body part")
 
-      delattr(Parts.Categories, body_part.registry_name)
+      delattr(self, body_part.registry_name)
 
 
-  def __str__():
-    width = 9
-    for name in Parts.names:
-      if len(name)+2 > width:
-        width = len(name) + 2
-
-
-    rows = ""
-    b = len(Parts.Bodies.registered)
-    g = len(Parts.Grippers.registered)
-    while b > 0 or g > 0:
-      temp = "\n"
-      if b > 0:
-        temp += f"{Parts.Bodies.names[b-1]}".center(width)
-      else:
-        temp += "".center(width)
-      temp += "|"
-      if g > 0:
-        temp += f"{Parts.Grippers.names[g-1]}".center(width)
-      else:
-        temp += "".center(width)
+  def __format__(self, format_spec:str="default"):
+    match format_spec:
+      case "table":
+        width = 9
+        for name in self.names:
+          if len(name)+2 > width:
+            width = len(name) + 2
+    
+    
+        rows = ""
+        b = len(self.bodies.registered)
+        g = len(self.grippers.registered)
+        while b > 0 or g > 0:
+          temp = "\n"
+          if b > 0:
+            temp += f"{self.bodies.names[b-1]}".center(width)
+          else:
+            temp += "".center(width)
+          temp += "|"
+          if g > 0:
+            temp += f"{self.grippers.names[g-1]}".center(width)
+          else:
+            temp += "".center(width)
+          
+          b -= 1
+          g -= 1
+          rows += temp
+    
+        return f"All body parts:"\
+          f"\n{"Bodies".ljust(width)}|{"Grippers".ljust(width)}"\
+          f"\n{"".ljust(width)}|{"".ljust(width)}"\
+          f"{rows}"\
+          f"\n{"".ljust(width)}|{"".ljust(width)}"\
       
-      b -= 1
-      g -= 1
-      rows += temp
+      case _:
+        return self.__str__()
+  
 
-    return f"All body parts:"\
-      f"\n{"Bodies".ljust(width)}|{"Grippers".ljust(width)}"\
-      f"\n{"".ljust(width)}|{"".ljust(width)}"\
-      f"{rows}"\
-      f"\n{"".ljust(width)}|{"".ljust(width)}"\
+  
+  @overload
+  def __getitem__(self, key:int) -> "Gripper":...
+  @overload
+  def __getitem__(self, key:str) -> "Gripper":...
+
+  def __getitem__(self, key) -> "Gripper":
+    '''
+    input a string with the parts registry name, or use an integer to find it as if this were a list
+    '''
+    if isinstance(key, str):
+      if key in self.bodies.registered:
+        return getattr(self.bodies, key)
+      elif key in self.grippers.registered:
+        return getattr(self.grippers, key)
+      else:
+        raise KeyError(f"{key} is not registred here")
+    elif isinstance(key, int):
+      if key < 0 or key >= len(self.all):
+        raise IndexError(f"Index {key} is out of range")
+      part = self.all[key]
+      if part in self.bodies.registered:
+        return getattr(self.bodies, part)
+      elif part in self.grippers.registered:
+        return getattr(self.grippers, part)
+      else:
+        raise KeyError(f"{key} is not registred here(There is a very big problem here, because it should exist if you've gotten to here)")
+    else:
+      raise TypeError("Key must be a string or an integer")
 
 
 class PartCategory:
@@ -356,10 +407,10 @@ class BodyPart(Part):
     self.item = item
     return self
 
-  def register(self, registry_name:str):
-    registry_error_check(registry_name, Parts.Bodies)
+  def register(self, registry_name:str, registry:Parts):
+    registry_error_check(registry_name, registry.bodies)
     self.__registry_name = registry_name
-    setattr(Parts.Bodies, registry_name, self)
+    setattr(registry.bodies, registry_name, self)
     return self
 
 
@@ -379,16 +430,16 @@ class Gripper(Part):
     return self
 
 
-  def register(self, registry_name:str):
-    registry_error_check(registry_name, Parts.Grippers)
+  def register(self, registry_name:str, registry: Parts):
+    registry_error_check(registry_name, registry.grippers)
     self.__registry_name = registry_name
-    setattr(Parts.Grippers, registry_name, self)
+    setattr(registry.grippers, registry_name, self)
     return self
 
 
 
 
-class Items(metaclass=staticstr):
+class Items(Registry, metaclass=staticstr):
   '''
   All items that can be in an entity's inventory
   '''
@@ -447,7 +498,7 @@ class Items(metaclass=staticstr):
 
 
 
-  class Wearables(metaclass=staticstr):
+  class Wearables(Registry, metaclass=staticstr):
     '''
     All items that can be woren by an entity
     '''
@@ -485,7 +536,7 @@ class Items(metaclass=staticstr):
 
 
 
-  class Usables(metaclass=staticstr):
+  class Usables(Registry, metaclass=staticstr):
     '''
     All items that have an active function
     '''
@@ -525,7 +576,7 @@ class Items(metaclass=staticstr):
 
 
 
-  class Generals(metaclass=staticstr):
+  class Generals(Registry, metaclass=staticstr):
     '''
     All items that have an active function
     '''
@@ -564,7 +615,7 @@ class Items(metaclass=staticstr):
 
 
 
-  class Categories(metaclass=staticstr):
+  class Categories(Registry, metaclass=staticstr):
     '''
     All items that have an active function
     '''
@@ -755,7 +806,7 @@ class ItemCategory:
 
 
   def register(self, registry_name:str):
-    registry_error_check(registry_name, Items.Categories.registered)
+    registry_error_check(registry_name, Items.Categories)
     self.__registry_name = registry_name
     setattr(Items.Categories, registry_name, self)
 
@@ -844,29 +895,19 @@ class WearableItem(Item):
   def __eq__(self, other:"WearableItem") -> bool:
     if not isinstance(other, WearableItem):
       return False
-    if self.name != other.name:
-      return False
-    if self.description != other.description:
-      return False
-    if self.value != other.value:
-      return False
-    if self.weight != other.weight:
-      return False
-    if self.wear_type != other.wear_type:
-      return False
-    if self.body_locations != other.body_locations:
-      return False
-    if self.slash_rating != other.slash_rating:
-      return False
-    if self.pierce_rating != other.pierce_rating:
-      return False
-    if self.bludgeon_rating != other.bludgeon_rating:
-      return False
-    if self.durability_type != other.durability_type:
-      return False
-    if self.durability != other.durability:
-      return False
-    return True
+    if all([self.name != other.name,
+    self.description != other.description,
+    self.value != other.value,
+    self.weight != other.weight,
+    self.wear_type != other.wear_type,
+    self.body_locations != other.body_locations,
+    self.slash_rating != other.slash_rating,
+    self.pierce_rating != other.pierce_rating,
+    self.bludgeon_rating != other.bludgeon_rating,
+    self.durability_type != other.durability_type,
+    self.durability != other.durability]):
+      return True
+    return False
 
 
 
@@ -980,33 +1021,21 @@ class UsableItem(Item):
   def __eq__(self, other:"UsableItem") -> bool:
     if not isinstance(other, UsableItem):
       return False
-    if self.name != other.name:
-      return False
-    if self.description != other.description:
-      return False
-    if self.value != other.value:
-      return False
-    if self.durability_type != other.durability_type:
-      return False
-    if self.durability != other.durability:
-      return False
-    if self.hands_needed != other.hands_needed:
-      return False
-    if self.slash_damage != other.slash_damage:
-      return False
-    if self.pierce_damage != other.pierce_damage:
-      return False
-    if self.bludgeon_damage != other.bludgeon_damage:
-      return False
-    if self.slash_rating != other.slash_rating:
-      return False
-    if self.pierce_rating != other.pierce_rating:
-      return False
-    if self.bludgeon_rating != other.bludgeon_rating:
-      return False
-    if self.use_speed != other.use_speed:
-      return False
-    return True
+    if all([self.name != other.name,
+    self.description != other.description,
+    self.value != other.value,
+    self.durability_type != other.durability_type,
+    self.durability != other.durability,
+    self.hands_needed != other.hands_needed,
+    self.slash_damage != other.slash_damage,
+    self.pierce_damage != other.pierce_damage,
+    self.bludgeon_damage != other.bludgeon_damage,
+    self.slash_rating != other.slash_rating,
+    self.pierce_rating != other.pierce_rating,
+    self.bludgeon_rating != other.bludgeon_rating,
+    self.use_speed != other.use_speed]):
+      return True
+    return False
 
   def set_durability_type(self, use_type:int):
     '''
@@ -1103,13 +1132,12 @@ class GeneralItem(Item):
   def __eq__(self, other:"GeneralItem") -> bool:
     if not isinstance(other, GeneralItem):
       return False
-    if self.name != other.name:
-      return False
-    if self.description != other.description:
-      return False
-    if self.value != other.value:
-      return False
-    return True
+    
+    if all([self.name != other.name,
+    self.description != other.description,
+    self.value != other.value]):
+      return True
+    return False
 
 
   def register(self, registry_name:str) -> "UsableItem":
@@ -1119,7 +1147,7 @@ class GeneralItem(Item):
 
 
 
-class Effects(metaclass=staticstr):
+class Effects(Registry, metaclass=staticstr):
   @staticproperty
   def all():
     return Effects.Instants.all + Effects.Temporaries.all + Effects.Permanents.all + Effects.Others.all
@@ -1188,7 +1216,7 @@ class Effects(metaclass=staticstr):
 
 
 
-  class Instants(metaclass=staticstr):
+  class Instants(Registry, metaclass=staticstr):
     @staticproperty
     def registered() -> list[str]:
       return check_attr(Effects.Instants.__dict__)
@@ -1215,7 +1243,7 @@ class Effects(metaclass=staticstr):
       return f"Instant Effects:{rows}"
 
 
-  class Temporaries(metaclass=staticstr):
+  class Temporaries(Registry, metaclass=staticstr):
     @staticproperty
     def registered() -> list[str]:
       return check_attr(Effects.Temporaries.__dict__)
@@ -1242,7 +1270,7 @@ class Effects(metaclass=staticstr):
       return f"Temporary Effects:{rows}"
 
 
-  class Permanents(metaclass=staticstr):
+  class Permanents(Registry, metaclass=staticstr):
     @staticproperty
     def registered() -> list[str]:
       return check_attr(Effects.Permanents.__dict__)
@@ -1269,7 +1297,7 @@ class Effects(metaclass=staticstr):
       return f"Permanent Effects:{rows}"
 
 
-  class Others(metaclass=staticstr):
+  class Others(Registry, metaclass=staticstr):
     @staticproperty
     def registered() -> list[str]:
       return check_attr(Effects.Others.__dict__)
@@ -1296,7 +1324,7 @@ class Effects(metaclass=staticstr):
       return f"Permanent Effects:{rows}"
 
 
-  class Catagories(metaclass=staticstr):
+  class Catagories(Registry, metaclass=staticstr):
     @staticproperty
     def registered() -> list[str]:
       return check_attr(Effects.Catagories.__dict__)
@@ -1491,6 +1519,16 @@ class Effect:
   def registry_name(self) -> str:
     return self.__registry_name
   
+  def __eq__(self, other: "Effect") -> bool:
+    if not isinstance(other, Effect):
+      raise TypeError("Effect can only be compared to an Effect")
+    if all([self.name,
+    self.description,
+    self.resist_req,
+    self.methods]):
+      return True
+    return False
+  
 
   def set_name(self, name:str):
     if not isinstance(name, str):
@@ -1608,6 +1646,12 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
       case _:
         return self.name
 
+  def __eq__(self, other:"InstantEffect") -> bool:
+    if not isinstance(other, InstantEffect):
+      raise TypeError("Can only compare InstantEffect to an InstantEffect.")
+
+    return super().__eq__(other)
+
 
 
   def register(self, registry_name:str):
@@ -1722,6 +1766,15 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
         return self.uuid
       case _:
         return self.name
+
+  def __eq__(self, value):
+    if not isinstance(value, TemporaryEffect):
+      raise TypeError("Can only compare TemporaryEffect to a TemporaryEffect.")
+    if super().__eq__(value):
+      if self.duration == value.duration:
+        return True
+    return False
+
 
 
   def register(self, registry_name:str):
@@ -1905,6 +1958,13 @@ class PermanentEffect(Effect):
       case _:
         return self.name
 
+  def __eq__(self, other:"PermanentEffect"):
+    if not isinstance(other, PermanentEffect):
+      raise TypeError("Can only compare PermanentEffect to a PermanentEffect")
+    if super().__eq__(other):
+      if self.release_req == other.release_req:
+        return True
+    return False
 
   def register(self, registry_name:str):
     registry_error_check(registry_name, Effects.Permanents.registered)
@@ -2191,3 +2251,26 @@ class Move(Action):
   def register(self, registry_name):
     super().register(registry_name, Action)
     return self
+
+
+def registry_error_check(registry_name:str, current_registry) -> None:
+  if not isinstance(current_registry, Registry):
+    raise TypeError("current_registry must be a Registry.")
+
+  if not registry_name:
+    raise RegistryError(f"Registry name cannot be empty.")
+  
+  if registry_name[0] == "_":
+    raise RegistryError(f"{registry_name}, registry name cannot start with '_'.")
+  
+  if registry_name[0].isnumeric():
+    raise RegistryError(f"{registry_name}, registry name cannot start with a number.")
+  
+  reg = registry_name.split("_")
+  for i in reg:
+    if not i.isalnum():
+      raise RegistryError(f"{registry_name}, registry name cannot contain special characters.")
+
+  for i in current_registry.registered:
+      if i == registry_name:
+        raise RegistryError(f"\"{registry_name}\", is not unique.")

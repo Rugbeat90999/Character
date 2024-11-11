@@ -560,44 +560,7 @@ charisma: {self.charisma}'''
   class Inventory:
     def __init__(self):
       self.stash = self.Stash()
-      self.equipment = self.Equipment()
-
-    class Equipment:
-      def __init__(self):
-        self.grippers = list[Gripper]()
-        self.body_parts = list[BodyPart]()
-
-
-      def add_gripper(self, gripper:Gripper):
-        if not isinstance(gripper, Gripper):
-          raise ValueError(f"gripper must be a Gripper, not {type(gripper)}")
-        self.grippers.append(gripper)
-        return self
-
-
-      def remove_gripper(self, gripper:Gripper):
-        if not isinstance(gripper, Gripper):
-          raise ValueError(f"gripper must be a Gripper, not {type(gripper)}")
-        if gripper not in self.grippers:
-          raise ValueError(f"This character does not have the gripper {gripper}")
-        self.grippers.remove(gripper)
-        return self
-
-
-      def add_body_part(self, body_part:BodyPart):
-        if not isinstance(body_part, BodyPart):
-          raise ValueError(f"body_part must be a BodyPart, not {type(body_part)}")
-        self.body_parts.append(body_part)
-        return self
-
-
-      def remove_gripper(self, body_part:BodyPart):
-        if not isinstance(body_part, BodyPart):
-          raise ValueError(f"gripper must be a Gripper, not {type(body_part)}")
-        if body_part not in self.grippers:
-          raise ValueError(f"This character does not have the body part {body_part}")
-        self.grippers.remove(body_part)
-        return self
+      self.equipment = registry_registeries.PARTS
 
 
     class Stash:
@@ -874,11 +837,4 @@ Big Platinum: {self.big_platinum}'''
 
 char = Character()
 
-
-char.inventory.equipment.add_gripper(Gripper().set_name("Left Hand").register("LEFT_HAND"))
-char.inventory.equipment.add_gripper(Gripper().set_name("Right Hand").register("RIGHT_HAND"))
-char.inventory.equipment.add_gripper(Gripper().set_name("Right Hand").register("RIGHT_HAND"))
-for i in range(9):
-  char.inventory.equipment.add_gripper(Gripper().set_name(f"Tail {i+1}"))
-
-char.inventory.equipment.add_body_part(BodyPart().set_name(""))
+print(char.inventory.equipment[0])
