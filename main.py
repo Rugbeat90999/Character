@@ -560,7 +560,7 @@ charisma: {self.charisma}'''
   class Inventory:
     def __init__(self):
       self.stash = self.Stash()
-      self.equipment = registry_registeries.PARTS
+      self.equipment = registry_registeries.A_PARTS
 
 
     class Stash:

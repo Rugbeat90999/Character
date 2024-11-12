@@ -439,48 +439,55 @@ class Gripper(Part):
 
 
 
-class Items(Registry, metaclass=staticstr):
+class Items(Registry):
   '''
   All items that can be in an entity's inventory
   '''
-  @staticproperty
-  def all():
-    return Items.Wearables.all + Items.Usables.all + Items.Generals.all
+  def __init__(self, name:str):
+    super().__init__(name)
+    self.wearables = self.Wearables()
+    self.usables = self.Usables()
+    self.generals = self.Generals()
+    self.categories = self.Categories()
+
+  @property
+  def all(self):
+    return self.wearables.all + self.usables.all + self.generals.all
   
-  @staticproperty
-  def names():
-    return Items.Wearables.names + Items.Usables.names + Items.Generals.names
+  @property
+  def names(self):
+    return self.wearables.names + self.usables.names + self.generals.names
   
-  @staticproperty
-  def registered():
-    return Items.Wearables.registered + Items.Usables.registered + Items.Generals.registered
+  @property
+  def registered(self):
+    return self.wearables.registered + self.usables.registered + self.generals.registered
 
 
-  def __str__():
+  def __str__(self):
     width = 9
-    for item in Items.names:
+    for item in self.names:
       if len(item)+2 > width:
         width = len(item) + 2
 
 
     rows = ""
-    w = len(Items.Wearables.registered)
-    t = len(Items.Usables.registered)
-    g = len(Items.Generals.registered)
+    w = len(self.wearables.registered)
+    t = len(self.usables.registered)
+    g = len(self.generals.registered)
     while w > 0 or t > 0 or g > 0:
       temp = "\n"
       if w > 0:
-        temp += f"{Items.Wearables.names[w-1]}".center(width)
+        temp += f"{self.wearables.names[w-1]}".center(width)
       else:
         temp += "".center(width)
       temp += "|"
       if t > 0:
-        temp += f"{Items.Usables.names[t-1]}".center(width)
+        temp += f"{self.usables.names[t-1]}".center(width)
       else:
         temp += "".center(width)
       temp += "|"
       if g > 0:
-        temp += f"{Items.Generals.names[g-1]}".center(width)
+        temp += f"{self.generals.names[g-1]}".center(width)
       else:
         temp += "".center(width)
       
@@ -498,159 +505,170 @@ class Items(Registry, metaclass=staticstr):
 
 
 
-  class Wearables(Registry, metaclass=staticstr):
+  class Wearables(Registry):
     '''
     All items that can be woren by an entity
     '''
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Items.Wearables.__dict__)
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def all():
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
+
+    @property
+    def all(self):
       li = []
-      for registered in Items.Wearables.registered:
-        li.append(getattr(Items.Wearables, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for usable in Items.Wearables.registered:
-        li.append(getattr(Items.Wearables, usable).name)
+      for usable in self.registered:
+        li.append(getattr(self, usable).name)
       return li
 
 
-    def __str__():
+    def __str__(self):
       rows = ""
-      for name in Items.Wearables.names:
+      for name in self.names:
         rows += f"\n  {name}"
       return f"Wearable Items:{rows}"\
 
-    def unregister(armor: "WearableItem"):
+    def unregister(self, armor: "WearableItem"):
       if not isinstance(armor, WearableItem):
         raise TypeError(f"{armor}, is not a wearable item")
-      if not armor.registry_name in Items.Wearables.registered:
+      if not armor.registry_name in self.registered:
         raise ValueError(f"{armor} is not registered")
-      delattr(Items.Wearables, armor.registry_name)
+      delattr(self, armor.registry_name)
 
 
 
-  class Usables(Registry, metaclass=staticstr):
+  class Usables(Registry):
     '''
     All items that have an active function
     '''
+    def __init__(self):
+      pass
 
     @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Items.Usables.__dict__)
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
 
     @staticproperty
-    def all():
+    def all(self):
       li = []
-      for registered in Items.Usables.registered:
-        li.append(getattr(Items.Usables, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
     @staticproperty
-    def names():
+    def names(self):
       li = list["str"]()
-      for wearable in Items.Usables.registered:
-        li.append(getattr(Items.Usables, wearable).name)
+      for wearable in self.registered:
+        li.append(getattr(self, wearable).name)
       return li
  
 
-    def __str__():
+    def __str__(self):
       rows = ""
-      for name in Items.Usables.names:
+      for name in self.names:
         rows += f"\n  {name}"
       return f"Usable Items:{rows}"
 
 
-    def unregister(item: "UsableItem"):
+    def unregister(self, item: "UsableItem"):
       if not isinstance(item, UsableItem):
         raise TypeError(f"{item}, is not a wearable item")
-      if not item.registry_name in Items.Usables.registered:
+      if not item.registry_name in self.registered:
         raise ValueError(f"{item} is not registered")
-      delattr(Items.Usables, item.registry_name)
+      delattr(self, item.registry_name)
 
 
 
-  class Generals(Registry, metaclass=staticstr):
+  class Generals(Registry):
     '''
     All items that have an active function
     '''
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Items.Generals.__dict__)
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
 
-    @staticproperty
-    def all():
+    @property
+    def all(self):
       li = []
-      for registered in Items.Generals.registered:
-        li.append(getattr(Items.Generals, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for wearable in Items.Generals.registered:
-        li.append(getattr(Items.Generals, wearable).name)
+      for wearable in self.registered:
+        li.append(getattr(self, wearable).name)
       return li
 
-    def __str__():
+
+    def __str__(self):
       rows = ""
-      for name in Items.Generals.names:
+      for name in self.names:
         rows += f"\n  {name}"
       return f"Wearable Items:{rows}"\
 
 
-    def unregister(item: "GeneralItem"):
+
+    def unregister(self, item: "GeneralItem"):
       if not isinstance(item, GeneralItem):
         raise TypeError(f"{item}, is not a wearable item")
-      if not item.registry_name in Items.Generals.registered:
+      if not item.registry_name in self.registered:
         raise ValueError(f"{item} is not registered")
-      delattr(Items.Generals, item.registry_name)
+      delattr(self, item.registry_name)
 
 
 
-  class Categories(Registry, metaclass=staticstr):
+  class Categories(Registry):
     '''
     All items that have an active function
     '''
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Items.Categories.__dict__)
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
 
-    @staticproperty
-    def all():
+    @property
+    def all(self):
       li = []
-      for registered in Items.Categories.registered:
-        li.append(getattr(Items.Categories, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for wearable in Items.Categories.registered:
-        li.append(getattr(Items.Categories, wearable).name)
+      for wearable in self.registered:
+        li.append(getattr(self, wearable).name)
       return li
 
-    def __str__():
+    def __str__(self):
       rows = ""
-      for name in Items.Categories.names:
+      for name in self.names:
         rows += f"\n  {name}"
       return f"Wearable Items:{rows}"\
 
 
-    def unregister(item: "ItemCategory"):
+    def unregister(self, item: "ItemCategory"):
       if not isinstance(item, ItemCategory):
         raise TypeError(f"{item}, is not a wearable item")
-      if not item.registry_name in Items.Categories.registered:
+      if not item.registry_name in self.registered:
         raise ValueError(f"{item} is not registered")
-      delattr(Items.Categories, item.registry_name)
+      delattr(self, item.registry_name)
 
 
 
@@ -805,10 +823,10 @@ class ItemCategory:
     return self
 
 
-  def register(self, registry_name:str):
-    registry_error_check(registry_name, Items.Categories)
+  def register(self, registry_name:str, registry: Items):
+    registry_error_check(registry_name, registry.categories)
     self.__registry_name = registry_name
-    setattr(Items.Categories, registry_name, self)
+    setattr(registry.categories, registry_name, self)
 
 
 class Item:
@@ -844,7 +862,7 @@ class Item:
     return self
   
   def register(self, registry_name:str, registry):
-    registry_error_check(registry_name, registry.registered)
+    registry_error_check(registry_name, registry)
     self.__registry_name = registry_name
     setattr(registry, registry_name, self)
 
@@ -978,8 +996,8 @@ class WearableItem(Item):
     return self
 
 
-  def register(self, registry_name:str) -> "UsableItem":
-    super().register(registry_name, Items.Wearables)
+  def register(self, registry_name:str, registry:Items) -> "UsableItem":
+    super().register(registry_name, registry.wearables)
     return self
 
 
@@ -1002,9 +1020,10 @@ class UsableItem(Item):
   def registry_name(self) -> str:
     return self.__registry_name
   
+
   def __str__(self):
     return f"Usable Item:"\
-           f"\n  UUID: {self.__uuid}"\
+           f"\n  Registry name: {self.__registry_name}"\
            f"\n  Name: {self.name}"\
            f"\n  Description: {self.description}"\
            f"\n  Value: {self.value}"\
@@ -1017,6 +1036,7 @@ class UsableItem(Item):
            f"\n  Bludgeon Rating: {self.bludgeon_rating}"\
            f"\n  Use Type: {self.durability_type}"\
            f"{f"\n  Durability: {self.durability}" if self.durability_type == 0 else ""}"\
+
 
   def __eq__(self, other:"UsableItem") -> bool:
     if not isinstance(other, UsableItem):
@@ -1037,6 +1057,7 @@ class UsableItem(Item):
       return True
     return False
 
+
   def set_durability_type(self, use_type:int):
     '''
     Durability type:\n
@@ -1054,13 +1075,15 @@ class UsableItem(Item):
       case _:
         raise ValueError(f"{use_type}, is an invalid use type.")
     return self
-  
+
+
   def set_durability(self, durability:int):
     if durability < 0:
       raise ValueError("Durability must be a non-negative integer.")
     self.durability = durability
     return self
-  
+
+
   def set_grippers_needed(self, hands_needed: int):
     '''
     set how many gripper slots are taken up by this item when equipped
@@ -1069,42 +1092,49 @@ class UsableItem(Item):
       raise ValueError("Hands need must be a non-negative integer.")
     self.hands_needed = hands_needed
     return self
-  
+
+
   def set_slash_damage(self, slash_damage: int):
     if slash_damage < 0:
       raise ValueError("Slash damage must be a non-negative integer.")
     self.slash_damage = slash_damage
     return self
-  
+
+
   def set_pierce_damage(self, pierce_damage: int):
     if pierce_damage < 0:
       raise ValueError("Pierce damage must be a non-negative integer.")
     self.pierce_damage = pierce_damage
     return self
   
+
   def set_bludgeon_damage(self, bludgeon_damage: int):
     if bludgeon_damage < 0:
       raise ValueError("Bludgeon damage must be a non-negative integer.")
     self.bludgeon_damage = bludgeon_damage
     return self
-  
+
+
   def set_slash_rating(self, slash_rating: int) -> "UsableItem":
     if slash_rating < 0:
       raise ValueError("Slash rating must be a non-negative integer.")
     self.slash_rating = slash_rating
     return self
-  
+
+
   def set_pierce_rating(self, pierce_rating: int) -> "UsableItem":
     if pierce_rating < 0:
       raise ValueError("Pierce rating must be a non-negative integer.")
     self.pierce_rating = pierce_rating
     return self
-  
+
+
   def set_bludgeon_rating(self, bludgeon_rating: int) -> "UsableItem":
     if bludgeon_rating < 0:
       raise ValueError("Bludgeon rating must be a non-negative integer.")
     self.bludgeon_rating = bludgeon_rating
     return self
+
 
   def set_speed(self, speed: int) -> "UsableItem":
     if speed < 0:
@@ -1112,8 +1142,9 @@ class UsableItem(Item):
     self.use_speed = speed
     return self
 
-  def register(self, registry_name:str) -> "UsableItem":
-    super().register(registry_name, Items.Usables)
+
+  def register(self, registry_name:str, registry: Items) -> "UsableItem":
+    super().register(registry_name, registry.usables)
     return self
 
 
@@ -1140,30 +1171,38 @@ class GeneralItem(Item):
     return False
 
 
-  def register(self, registry_name:str) -> "UsableItem":
-    super().register(registry_name, Items.Generals)
+  def register(self, registry_name:str, registry:Items) -> "UsableItem":
+    super().register(registry_name, registry.generals)
     return self
 
 
 
 
-class Effects(Registry, metaclass=staticstr):
-  @staticproperty
-  def all():
-    return Effects.Instants.all + Effects.Temporaries.all + Effects.Permanents.all + Effects.Others.all
+class Effects(Registry):
+  def __init__(self, name:str):
+    super().__init__(name)
+    self.instants = self.Instants()
+    self.temporaries = self.Temporaries()
+    self.permanents = self.Permanents()
+    self.others = self.Others()
+    self.catagories = self.Catagories()
 
-  @staticproperty
-  def registered():
-    return Effects.Instants.registered + Effects.Temporaries.registered + Effects.Permanents.registered + Effects.Others.registered
+  @property
+  def all(self):
+    return self.instants.all + self.temporaries.all + self.permanents.all + self.others.all
 
-  @staticproperty
-  def names():
-    return Effects.Instants.names + Effects.Temporaries.names + Effects.Permanents.names + Effects.Others.names
+  @property
+  def registered(self):
+    return self.instants.registered + self.temporaries.registered + self.permanents.registered + self.others.registered
 
-  def __str__():
+  @property
+  def names(self):
+    return self.instants.names + self.temporaries.names + self.permanents.names + self.others.names
+
+  def __str__(self):
     return Effect.__format__()
 
-  def __format__(format_spec:str="All"):
+  def __format__(self, format_spec:str="All"):
     match format_spec:
       case _:
         width = 9
@@ -1216,137 +1255,152 @@ class Effects(Registry, metaclass=staticstr):
 
 
 
-  class Instants(Registry, metaclass=staticstr):
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Effects.Instants.__dict__)
+  class Instants(Registry):
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def all():
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
+
+    @property
+    def all(self):
       li = []
-      for registered in Effects.Instants.registered:
-        li.append(getattr(Effects.Instants, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for usable in Effects.Instants.registered:
-        li.append(getattr(Effects.Instants, usable).name)
+      for usable in self.registered:
+        li.append(getattr(self, usable).name)
       return li
 
 
-    def __str__() -> str:
+    def __str__(self) -> str:
       rows = ""
-      for effect in Effects.Instants.names:
+      for effect in self.names:
         rows += f"\n  {effect}"
       return f"Instant Effects:{rows}"
 
 
-  class Temporaries(Registry, metaclass=staticstr):
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Effects.Temporaries.__dict__)
+  class Temporaries(Registry):
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def all():
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
+
+    @property
+    def all(self):
       li = []
-      for registered in Effects.Temporaries.registered:
-        li.append(getattr(Effects.Temporaries, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for usable in Effects.Temporaries.registered:
-        li.append(getattr(Effects.Temporaries, usable).name)
+      for usable in self.registered:
+        li.append(getattr(self, usable).name)
       return li
 
 
-    def __str__() -> str:
+    def __str__(self) -> str:
       rows = ""
-      for effect in Effects.Temporaries.names:
+      for effect in self.names:
         rows += f"\n  {effect}"
       return f"Temporary Effects:{rows}"
 
 
-  class Permanents(Registry, metaclass=staticstr):
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Effects.Permanents.__dict__)
+  class Permanents(Registry):
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def all():
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
+
+    @property
+    def all(self):
       li = []
-      for registered in Effects.Permanents.registered:
-        li.append(getattr(Effects.Permanents, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for usable in Effects.Permanents.registered:
-        li.append(getattr(Effects.Permanents, usable).name)
+      for usable in self.registered:
+        li.append(getattr(self, usable).name)
       return li
 
 
-    def __str__() -> str:
+    def __str__(self) -> str:
       rows = ""
-      for effect in Effects.Permanents.names:
+      for effect in self.names:
         rows += f"\n  {effect}"
       return f"Permanent Effects:{rows}"
 
 
-  class Others(Registry, metaclass=staticstr):
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Effects.Others.__dict__)
+  class Others(Registry):
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def all():
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
+
+    @property
+    def all(self):
       li = []
-      for registered in Effects.Others.registered:
-        li.append(getattr(Effects.Others, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for registered in Effects.Others.registered:
-        li.append(getattr(Effects.Others, registered).name)
+      for registered in self.registered:
+        li.append(getattr(self, registered).name)
       return li
 
 
-    def __str__() -> str:
+    def __str__(self) -> str:
       rows = ""
-      for effect in Effects.Others.names:
+      for effect in self.names:
         rows += f"\n  {effect}"
       return f"Permanent Effects:{rows}"
 
 
-  class Catagories(Registry, metaclass=staticstr):
-    @staticproperty
-    def registered() -> list[str]:
-      return check_attr(Effects.Catagories.__dict__)
+  class Catagories(Registry):
+    def __init__(self):
+      pass
 
-    @staticproperty
-    def all():
+    @property
+    def registered(self) -> list[str]:
+      return check_attr(self.__dict__)
+
+    @property
+    def all(self):
       li = []
-      for registered in Effects.Catagories.registered:
-        li.append(getattr(Effects.Catagories, registered))
+      for registered in self.registered:
+        li.append(getattr(self, registered))
       return li
     
-    @staticproperty
-    def names():
+    @property
+    def names(self):
       li = list["str"]()
-      for usable in Effects.Catagories.registered:
-        li.append(getattr(Effects.Catagories, usable).name)
+      for usable in self.registered:
+        li.append(getattr(self, usable).name)
       return li
 
 
-    def __str__() -> str:
+    def __str__(self) -> str:
       rows = ""
-      for catagories in Effects.Catagories.all:
+      for catagories in self.all:
         rows += f"{catagories}\n"
       rows = rows.removesuffix("\n")
       return f"Effects Catagories:\n"\
@@ -1484,10 +1538,10 @@ class EffectCategory:
     return self
 
 
-  def register(self, registry_name:str):
-    registry_error_check(registry_name, Effects.Catagories.all)
+  def register(self, registry_name:str, registry:Effects):
+    registry_error_check(registry_name, registry.catagories)
     self.__registry_name = registry_name
-    setattr(Effects.Catagories, registry_name, self)
+    setattr(registry.catagories, registry_name, self)
     return self
 
 
@@ -1654,10 +1708,10 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
 
 
 
-  def register(self, registry_name:str):
-    registry_error_check(registry_name, Effects.registered)
+  def register(self, registry_name:str, registry: Effects):
+    registry_error_check(registry_name, registry)
     self.__registry_name = registry_name
-    setattr(Effects.Instants, registry_name, self)
+    setattr(registry.instants, registry_name, self)
     return self
 
 
@@ -1777,10 +1831,10 @@ f"{ f"\nCatagories: {self.catagory}" if self.catagory  != [] else ""}"
 
 
 
-  def register(self, registry_name:str):
-    registry_error_check(registry_name, Effects.Temporaries.registered)
+  def register(self, registry_name:str, registry: Effects):
+    registry_error_check(registry_name, registry)
     self.__registry_name = registry_name
-    setattr(Effects.Temporaries, registry_name, self)
+    setattr(registry.temporaries, registry_name, self)
     return self
 
 
@@ -1966,10 +2020,10 @@ class PermanentEffect(Effect):
         return True
     return False
 
-  def register(self, registry_name:str):
-    registry_error_check(registry_name, Effects.Permanents.registered)
+  def register(self, registry_name:str, registry:Effects):
+    registry_error_check(registry_name, registry)
     self.__registry_name = registry_name
-    setattr(Effects.Permanents, registry_name, self)
+    setattr(registry.permanents, registry_name, self)
     return self
   
 
@@ -2253,7 +2307,7 @@ class Move(Action):
     return self
 
 
-def registry_error_check(registry_name:str, current_registry) -> None:
+def registry_error_check(registry_name:str, current_registry:Registry) -> None:
   if not isinstance(current_registry, Registry):
     raise TypeError("current_registry must be a Registry.")
 
