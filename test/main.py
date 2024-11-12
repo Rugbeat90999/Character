@@ -101,33 +101,52 @@ class Inventory:
       raise ValueError("weight_limit must be greater than or equal to 0(set to 0 to remove limit)")
     self.__size = size
     self.__weight_limit = weight_limit
-    self.__items = self.__Slots(self.__size)
-  
-  class __Slots:
-    def __init__(self, size: int):
-      self.__slots = list[dict[str, int | type(None) | Item]]()
-      for i in range(size):
-        self.__slots.append({"item":None, "num":1})
+    self.__items = list[dict[str, int | type(None) | Item]]()
 
-    def __getitem__(self, key):
-      if isinstance(key, int):
-        return self.__slots[key]
-      # if isinstance(key, str):
-      #   names = []
-      #   for slot in self.__slots:
-      #     slot["item"]
-      #   if key not in self.__slots:
-      #     raise KeyError(f"Item with name {key} not found")
-      # if isinstance(key, Item):
-      #   for slot_index in len(self.__slots):
-      #     self.__slots[slot_index]
-      #   raise ValueError(f"Item {key} not found in inventory")
-      # if isinstance(key, UUID):
+    for i in range(size):
+      self.__items.append({"item":None, "num":1})
+  
+  @property
+  def items(self):
+    return self.__items
+  
+  def __str__(self):
+    return str(self.__items)
+
+  def __getitem__(self, key):
+    if isinstance(key, int):
+      return self.__items[key]
+    else:
+      raise TypeError(f"key must be int not {type(key)}")
+
+  def __setitem__(self, key, value):
+    if not isinstance(key, int):
+      raise TypeError(f"Key must be int not {type(key)}")
+    if key < 0 or key >= len(self.__items):
+      raise ValueError("Key out of index range")
+    if not isinstance(value, Item):
+      raise ValueError(f"Slot can only hold items, not {type(value)}")
     
-    def __setitem__(self, key, value):
-      
+    self.__items[key] = {"item":value, "num":1}
+
+  def __delitem__(self, key):
+    if not isinstance(key, int):
+      raise TypeError(f"Key must be int not {type(key)}")
+    if key < 0 or key >= len(self.__items):
+      raise ValueError("Key out of index range")
+    
+    self.__items[key] = {"item":None, "num":1}
+
+
 
 
 ITEM = Item(UUID(), "item 1", 15)
 
 INV = Inventory(3, 50)
+
+
+print(INV)
+
+INV[0]
+
+print(INV[0])
