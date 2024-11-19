@@ -15,6 +15,8 @@ CBC = str(OutputColors(color="yellow")) + "\u007d" + str(DEFA)
 SBO = str(OutputColors(color="yellow")) + "[" + str(DEFA)
 SBC = str(OutputColors(color="yellow")) + "]" + str(DEFA)
 COM = str(OutputColors(color="red")) + ", " + str(DEFA)
+ERR = str(OutputColors(color="magenta"))
+CLS = str(OutputColors(color="green", font="bold"))
 
 
 
@@ -439,7 +441,7 @@ class Slot:
     if isinstance(tags, list):
       for tag in tags:
         if not isinstance(tag, Tag):
-          raise ValueError(f"tags must only contain \"\077[1;32mTag{DEFA}\"s not {type(tag)}")
+          raise ValueError(f"tags must only contain {CLS}Tag{ERR} not {type(tag)}")
     self.__slot_num = slot_num
     self.__slot_name = slot_name
     self.__item = None
@@ -510,7 +512,7 @@ class Slot:
         if isinstance(value, list):
           for tag in value:
             if not isinstance(tag, Tag):
-              raise ValueError(f"tags must only contain \"\077[1;32mTag{DEFA}\"s not {type(tag)}")
+              raise ValueError(f"tags must only contain {CLS}Tag{ERR} not {type(tag)}")
             self.value = value
       case _:
         raise KeyError(f"Invalid key: {key}")
@@ -561,12 +563,12 @@ class Inventory:
     string = ""
     for slot in self.__slots:
       string += f"\n {str(slot)}"
-    return f"{TITLE}Inventory{COL}{DEFA}{string}{DEFA}"
+    return f"{TITLE}{self.__display_name}{COL}{DEFA}{string}{DEFA}"
 
   def __getitem__(self, key) -> Slot:
     if isinstance(key, int):
       for slot in self.__slots:
-        if slot[0] == key:
+        if slot["slot_num"] == key:
           return slot
       raise KeyError(f"Slot {key} does not exist")
     elif isinstance(key, str):
@@ -664,11 +666,19 @@ class EffectInstance:
 
 
 
+class Race:
+  def __init__(self):
+    self.inventoreis = []
+    self.effects = []
+
+
+
+
 class Character:
   def __init__(self):
     self.__registry_name = None
     # self.info = self.Info()
-    # self.inventory = self.Inventory()
+    self.inventory = self.Inventory()
 
   def __str__(self):
     return f"{self.__registry_name}"
@@ -720,4 +730,7 @@ class Character:
         for i in self.middle:
           string += f"{i} "
         return f"{self.given} {string}{self.sir}"
-      
+
+
+
+
