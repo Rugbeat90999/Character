@@ -1,0 +1,14 @@
+{
+  "N/A":"No aplica",
+  "prints":
+  {
+    "item": "Elemento",
+    "registry_name": "Nombre del registro",
+    "display_name": "Nombre para mostrar",
+    "value": "Valor",
+    "stack_size": "Tamaño de la pila",
+    "weight": "Peso",
+    "description": "Descripción",
+    "tags": "Etiquetas"
+  },
+}

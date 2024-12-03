@@ -1,5 +1,5 @@
-from CommonLib.classes import UUID, OutputColors
-import random
+from CommonLib.classes import UUID, OutputColors, Path
+import json
 
 
 
@@ -18,26 +18,60 @@ COM = str(OutputColors(color="red")) + ", " + str(DEFA)
 ERR = str(OutputColors(color="magenta"))
 CLS = str(OutputColors(color="green", font="bold"))
 
+def settings() -> dict:
+  with open(Path("./default_settings.cfg").path, "r", encoding="utf-8") as file:
+    return json.load(file)
+
+def lang() -> dict:
+  with open(Path(f"./lang/{settings()["GENERAL"]["lang"]}.json").path, "r", encoding="utf-8") as file:
+    return json.load(file)
 
 
 
-def registry_name_check(name:str, registry: "Items"):
-  if not isinstance(registry, Items):
-    raise ValueError(f"registry must be an instance of Items not {type(registry)}")
-  if not isinstance(name, str):
-    raise ValueError(f"name must be a string not {type(name)}")
-  if name[0] == "_":
-    raise ValueError(f"Name '{name}' cannot start with underscore")
-  if type(name[0]) == int:
-    raise ValueError(f"Name '{name}' cannot start with a number")
-  if name[-1] == "_":
-    raise ValueError(f"Name '{name}' cannot end with underscore")
-  for part in name.split("_"):
-    if not part.isalnum():
-      raise ValueError(f"Name '{name}' cannot contain special characters besides underscore")
-  for reg in registry.name_list():
-    if reg == name:
-      raise ValueError(f"Name '{name}' already exists")
+
+
+class Registry:
+  def __init__(self):
+    self.__registry = list()
+
+  @property
+  def registry(self):
+    return self.__registry
+  
+  @property
+  def names(self):
+    return [registry_item["name"] for registry_item in self.__registry]
+
+  # def __str__(self):
+
+
+
+  def get(self, name: str):
+    for item in self.__registry:
+      if item["registry_name"] == name:
+        return item
+    raise ValueError(f"registry item \"{name}\" does not exist")
+
+
+  def remove(self, name: str):
+    self.__registry.remove(self.get(name))
+
+
+  def register(self, item:"Item"):
+    if not isinstance(item.registry_name, str):
+      raise ValueError(f"name must be a string not {type(item.registry_name)}")
+    if item.registry_name[0] == "_":
+      raise ValueError(f"Name '{item.registry_name}' cannot start with underscore")
+    if type(item.registry_name[0]) == int:
+      raise ValueError(f"Name '{item.registry_name}' cannot start with a number")
+    if item.registry_name[-1] == "_":
+      raise ValueError(f"Name '{item.registry_name}' cannot end with underscore")
+    for part in item.registry_name.split("_"):
+      if not part.isalnum():
+        raise ValueError(f"Name '{item.registry_name}' cannot contain special characters besides underscore")
+    if item.registry_name in self.names:
+      raise ValueError(f"Name '{item.registry_name}' already exists")
+
 
 
 
@@ -59,7 +93,8 @@ class Tag:
     self.__tag = tag
     Tag.registerd.append(self)
 
-
+  def __str__(self):
+    return f"{self.__tag}"
        
   @property
   def tag(self):
@@ -87,134 +122,41 @@ class Tag:
 
 
 # Item
-class Items:
-  def __init__(self, weight: bool, value: bool, stack_size: bool):
-    if not isinstance(weight, bool):
-      raise ValueError(f"weight must be a bool not {type(weight)}")
-    if not isinstance(value, bool):
-      raise ValueError(f"value must be a bool not {type(value)}")
-    if not isinstance(stack_size, bool):
-      raise ValueError(f"stack_size must be a bool not {type(stack_size)}")
-    self.weight = weight
-    self.value = value
-    self.stack_size = stack_size
-    self.__registry = list[Item]()
-
-  def __str__(self):
-    string = ""
-    for item in self.__registry:
-      string += f"{item}\n"
-    return f"Items:\n{string}"
-  
-  def __getitem__(self, key):
-    if isinstance(key, int):
-      return self.__registry[key]
-    elif isinstance(key, str):
-      for item in self.__registry:
-        if item["name"] == key:
-          return item
-      raise ValueError(f"Name \"{key}\" does not exist")
-    else:
-      raise TypeError("Key must be int or str")
+class Item:
+  registry = Registry()
+  def __init__(self, registry_name: str):
+    self.__registry_name = registry_name
+    self.__weight = 0
+    self.__value = 0
+    self.__stack_size = 1
+    self.__tags = []
   
   @property
-  def registry(self) -> list[str]:
-    return self.__registry
-  
-
-
-
-  def add(self, name: str, display_name:str, weight: int = 0,  value: int = 0, stack_size:int = 1, description: str = "N/A", tag_list: list[str] = None):
-    if not self.weight:
-      weight = -1
-    if not self.value:
-      value = -1
-    if not self.stack_size:
-      stack_size = -1
-    item = Item(self, name, display_name, weight,  value, stack_size, description, tag_list)
-    self.__registry.append(item)
-    return item
-
-
-  def remove(self, name: str):
-    for item in self.__registry:
-      if item["name"] == name:
-        self.__registry.remove(item)
-        return item
-    raise ValueError(f"Name '{name}' does not exist")
-
-
-  def get(self, name: str):
-    for item in self.__registry:
-      if item["name"] == name:
-        return item
-    raise ValueError(f"Name '{name}' does not exist")
-
-
-  def name_list(self):
-    for item in self.__registry:
-      yield item["name"]
-
-
-
-
-class Item:
-  def __init__(self, registry: Items, name: str, display_name:str, weight: int,  value: int, stack_size:int, description: str , tags: list[str]):
-    registry_name_check(name, registry)
-    if not isinstance(display_name, str):
-      raise ValueError(f"display_name must be a string not {type(display_name)}")
-    if not isinstance(weight, int):
-      raise ValueError(f"weight must be an int not {type(weight)}")
-    if weight < -1:
-      raise ValueError("weight must be greater than or equal to -1(set to -1 to remove weight)")
-    if not isinstance(value, int):
-      raise ValueError(f"value must be an int not {type(value)}")
-    if value < -1:
-      raise ValueError("value must be greater than or equal to -1(set to -1 to remove value)")
-    if not isinstance(stack_size, int):
-      raise ValueError(f"stack_size must be an int not {type(stack_size)}")
-    if stack_size < 0:
-      raise ValueError("stack_size must be greater than or equal to 0 (set to 0 to remove stack limit)")
-    if not isinstance(description, str):
-      raise ValueError(f"description must be a string not {type(description)}")
-    if not isinstance(tags, (list, type(None))):
-      raise ValueError(f"tags must be a list or None not {type(tags)}")
-    if isinstance(tags, list):
-      for tag in tags:
-        if not isinstance(tag, str):
-          raise ValueError(f"all tags must be strings")
-    
-
-    self.__registry = registry
-    self.__name = name
-    self.__display_name = display_name
-    self.__weight = weight
-    self.__value = value
-    self.__stack_size = stack_size
-    self.__description = description
-    self.__tags = tags
-
+  def registry_name(self) -> str:
+    return self.__registry_name
 
   def __str__(self) -> str:
     tags = ""
     for tag in self.__tags:
       tags += f"{COM}{VAR}{tag}{DEFA}"
     tags.lstrip(COM)
-    return f"{TITLE}Item{COL}{DEFA}"\
-  f"\n{CON} Name{COL} {VAR}{self.__name}{DEFA}"\
-  f"\n{CON} Display Name{COL} {VAR}{self.__display_name}{DEFA}"\
-  f"{f"\n{CON} Value{COL} {VAR}{self.__value}" if self.__value != -1 else ""}{DEFA}"\
-  f"{f"\n{CON} Stack Size{COL} {VAR}{self.__stack_size}" if self.__stack_size != 0 else ""}{DEFA}"\
-  f"{f"\n{CON} Weight{COL} {VAR}{self.__weight}" if self.__weight != -1 else ""}{DEFA}"\
-  f"\n{CON} Description{COL} {VAR}{self.__description}{DEFA}"\
-  f"\n{CON} Tags{COL} {VAR}{self.__description}{DEFA}"\
+    print_lang = lang()["prints"]
+
+    return f"{TITLE}{print_lang["item"]}{COL}{DEFA}"\
+  f"\n{CON} {print_lang["registry_name"]}{COL} {VAR}{None}{DEFA}"\
+  f"\n{CON} {print_lang["display_name"]}{COL} {VAR}{None}{DEFA}"\
+  f"{f"\n{CON} {print_lang["value"]}{COL} {VAR}{self.__value}" if self.__value != -1 else ""}{DEFA}"\
+  f"{f"\n{CON} {print_lang["stack_size"]}{COL} {VAR}{self.__stack_size}" if self.__stack_size != 0 else ""}{DEFA}"\
+  f"{f"\n{CON} {print_lang["weight"]}{COL} {VAR}{self.__weight}" if self.__weight != -1 else ""}{DEFA}"\
+  f"\n{CON} {print_lang["description"]}{COL} {VAR}{None}{DEFA}"\
+  f"\n{CON} {print_lang["tags"]}{COL} {VAR}{None}{DEFA}"\
   
   def __getitem__(self, key):
     if not isinstance(key, (str, int)):
       raise TypeError(f"Invalid type: {type(key)}")
     match key:
-      case "name":
-        return self.__name
+      case "registry_name":
+        return self.__registry_name
       case "display_name":
         return self.__display_name
       case "weight":
@@ -232,31 +174,20 @@ class Item:
     if not isinstance(key, (str, int)):
       raise TypeError(f"Invalid type: {type(key)}")
     match key:
-      case "name" | 0:
-        self.set_name(value)
-      case "display_name" | 1:
-        self.set_display_name(value)
-      case "weight" | 1:
+      case "registry_name":
+        raise AssertionError("Cannot set registry name outside of definistion of item")
+      case "display_name":
+        raise AssertionError("Cannot set registry name outside of definistion of item")
+      case "weight":
         self.set_weight(value)
-      case "value" | 2:
+      case "value":
         self.set_value(value)
-      case "stack_size" | 3:
+      case "stack_size":
         self.set_stack_size(value)
-      case "description" | 4:
+      case "description":
         self.set_description(value)
       case _:
         raise KeyError(f"Invalid key: {key}")
-
-
-  def set_name(self, new_name: str):
-    registry_name_check(new_name, self.__registry)
-    self.__name = new_name
-
-
-  def set_display_name(self, new_name: str):
-    if not isinstance(new_name, str):
-      raise ValueError(f"display_name must be a string not {type(new_name)}")
-    self.__display_name = new_name
 
 
   def set_value(self, new_value: int):
@@ -267,6 +198,7 @@ class Item:
     if new_value < -1:
       raise ValueError("value cannot be less than -1")
     self.__value = new_value
+    return self
 
 
   def set_stack_size(self, new_stack_size: int):
@@ -275,6 +207,7 @@ class Item:
     if not isinstance(new_stack_size, int):
       raise ValueError(f"stack_size must be an int not {type(new_stack_size)}")
     self.__stack_size = new_stack_size
+    return self
 
 
   def set_weight(self, new_weight: int):
@@ -283,28 +216,32 @@ class Item:
     if not isinstance(new_weight, int):
       raise ValueError(f"weight must be an int not {type(new_weight)}")
     self.__weight = new_weight
+    return self
 
 
   def set_description(self, new_description: str):
     if not isinstance(new_description, str):
       raise ValueError(f"description must be a string not {type(new_description)}")
     self.__description = new_description
+    return self
   
 
-  def add_tag(self, tag_or_tags: str | list[str]):
-    if not isinstance(tag_or_tags, (str, list)):
+  def add_tag(self, tag_or_tags: Tag | list[Tag]):
+    if not isinstance(tag_or_tags, (Tag, list)):
       raise TypeError(f"tag_or_tags must be an str or a list of str not {type(tag_or_tags)}")
     if self.__tags == None:
       self.__tags = list[str]()
     if isinstance(tag_or_tags, list):
       for tag in tag_or_tags:
-        if not isinstance(tag, str):
-          raise TypeError(f"tag_or_tags must be a list of str not {type(tag_or_tags)}")
+        if not isinstance(tag, Tag):
+          raise TypeError(f"tag_or_tags must be a list of Tag not {type(tag_or_tags)}")
         self.__tags.append(tag)
-    if isinstance(tag_or_tags, str):
+    if isinstance(tag_or_tags, Tag):
       self.__tags.append(tag_or_tags)
-  
-  def remove_tag(self, tag_or_tags: str | list[str]):
+    return self
+
+
+  def remove_tag(self, tag_or_tags: Tag | list[Tag]):
     if not isinstance(tag_or_tags, (int, list)):
       raise TypeError(f"tag_or_tags must be an int or a list of str not {type(tag_or_tags)}")
     if isinstance(tag_or_tags, list):
@@ -316,6 +253,12 @@ class Item:
       self.__tags.remove(tag_or_tags)
     if self.__tags == []:
       self.__tags = None
+    return self
+
+
+  def register(self):
+    Item.registry.register(self)
+    return self
 
 
 
@@ -327,7 +270,6 @@ class ItemInstance:
     self.__uuid = uuid
     self.__item = item
     self.__modifiers = ItemModifiers(self)
-
 
   def __str__(self):
     return f"{TITLE}Item Instance{COL}{DEFA}"\
@@ -582,9 +524,9 @@ class Inventory:
 
   def __setitem__(self, key: str | int, value: ItemInstance | int):
     for slot in self.__slots:
-      if slot[0] == key:
+      if slot["slot_num"] == key:
         if isinstance(value, int):
-          slot[3] = 1
+          slot["item"] = 1
           return
         elif isinstance(value, ItemInstance):
           slot[2] = value
@@ -618,7 +560,7 @@ class Inventory:
     if not isinstance(slot_num, int):
       raise ValueError(f"slot_num must be an int not {type(slot_num)}")
     for slot in self.__slots:
-      if slot[1] == slot_num:
+      if slot["slot_num"] == slot_num:
         raise ValueError(f"Slot {slot_num} already exists")
     self.__slots.append(Slot(slot_num))
 
@@ -633,29 +575,43 @@ class Inventory:
     raise ValueError(f"Slot {slot_num} does not exist")
 
 
-
-
-class BaseEffects:
-  def __init__(self):
-    self.__registry = list[BaseEffect]()
-  
-
-
-
-class BaseEffect:
-  pass
-
-
-
-
-class Effects:
-  pass
+  def copy(self, new_name, new_display_name):
+    inv  = Inventory(len(self.__slots), new_name, new_display_name)
+    
+    for i in range(len(self.__slots)):
+      inv.__slots[i] = self.__slots[i]
+    
+    return inv
 
 
 
 
 class Effect:
-  pass
+  registry = Registry()
+  def __init__(self, registry_name: str):
+    self.__registry_name = registry_name
+    self.__funcitons = []
+
+  @property
+  def registry_name(self):
+    return self.__registry_name
+  
+  def funcitons_list(self):
+    return self.__funcitons
+  
+
+  def activate(self):
+    for func in self.__funcitons:
+      return func()
+
+
+  def add_func(self, func):
+    if not callable(func):
+      raise TypeError(f"func must be a callable not {type(func)}")
+    
+
+  def register(self):
+    Effect.registry.register(self)
 
 
 
@@ -666,23 +622,276 @@ class EffectInstance:
 
 
 
-class Race:
-  def __init__(self):
-    self.inventoreis = []
-    self.effects = []
+
+
 
 
 
 
 class Character:
-  def __init__(self):
+  characters = list["Character"]()
+  def __init__(self, char_file: Path, registry_name: str):
+    if registry_name in Character.characters:
+      raise ValueError(f"Character with registry_name {registry_name} already exists")
+    
+    if not isinstance(char_file, Path):
+      raise ValueError("Path must be an instance of Path")
+    if char_file.file_extension != ".char":
+      raise ValueError("file must be a char file")
+
+    given_name = ""
+    sir_name = ""
+    middle_names = []
+
+    race = ""
+    age = 0
+    gender = ""
+    description = ""
+
+    level = 0
+    strength = 0
+    consitution = 0
+    agility = 0
+    will = 0
+    perception = 0
+    inteligence = 0
+    charisma = 0
+    stat_points = 0
+
+    # open an parse file
+    with open(char_file.path, "r") as file:
+      char_data = "".join(file.readlines())
+      li = dict[str, str]()
+      for data in char_data.split(";"):
+        data = "".join(data.split("\n"))
+        data = "".join(data.split(" "))
+        if data == "":
+          continue
+        li.update({data.split(":")[0]: data.split(":")[1]})
+
+      for i in li:
+        match i:
+          case "name":
+            middle_names = li[i].split(",")
+            given_name = middle_names.pop(0)
+            sir_name = middle_names.pop(0)
+          case "race":
+            race = li[i]
+          case "age":
+            age = int(li[i])
+          case "gender":
+            gender = li[i]
+          case "description":
+            description = " ".join(li[i].split("_"))
+          case "exp":
+            level = int(li[i])
+          case "str":
+            strength = int(li[i])
+          case "con":
+            consitution = int(li[i])
+          case "agi":
+            agility = int(li[i])
+          case "wil":
+            will = int(li[i])
+          case "per":
+            perception = int(li[i])
+          case "int":
+            inteligence = int(li[i])
+          case "cha":
+            charisma = int(li[i])
+          case "points":
+            stat_points = int(li[i])
+    
+
+
     self.__registry_name = None
-    # self.info = self.Info()
-    self.inventory = self.Inventory()
+    self.status = self.Status()
+    # self.inventory = self.Inventory()
+    self.info = self.Info(given_name, sir_name, middle_names, race, age, gender, description)
 
   def __str__(self):
     return f"{self.__registry_name}"
-  
+
+
+
+  class Status:
+    def __init__(self):
+      # self.effects = self.Effects()
+
+      self.__xp = 0
+      self.__stat_points = 0
+
+      self.__health_points = 0
+      self.__mana_points = 0
+      self.__stamina_points = 0
+      self.__strength_points = 0
+      self.__constitution_points = 0
+      self.__agility_points = 0
+      self.__will_points = 0
+      self.__perseption_points = 0
+      self.__intelligence_points = 0
+      self.__charisma_points = 0
+      self.__health = self.max_health
+      self.__mana = self.max_mana
+      self.__stamina = self.max_stamina
+
+    @property
+    def level(self) -> int:
+      level = 0
+      xp = self.__xp
+      while xp >= (level * 50 + 100):
+        xp -= (level * 50 + 100)
+        level += 1
+      
+      return level
+    
+    @property
+    def xp(self) -> int:
+      level = 0
+      xp = self.__xp
+      while xp >= (level * 50 + 100):
+        xp -= (level * 50 + 100)
+        level += 1
+      
+      return xp
+    
+    @property
+    def xp_to_next_level(self) -> int:
+      return self.level * 50 + 100
+
+    @property
+    def max_health(self) -> int:
+      base = 90
+      points = 0
+      points += self.__health_points * 5
+      points += (self.level * 5)
+
+      points += int((self.constitution * 2 + self.agility * 1.5 + self.strength) // 4 - 1)
+
+      # return base + points + self.effects.max_health
+
+    @property
+    def max_mana(self) -> int:
+      base = 100
+      points = 0
+      points += self.__mana_points * 5
+      points += (self.level * 5)
+      
+      return base + points
+
+    @property
+    def max_stamina(self) -> int:
+      base = 100
+      points = 0
+      points += self.__stamina_points * 5
+      points += (self.level * 5)
+      
+      return base + points
+
+    @property
+    def health(self) -> int:
+      if self.__health > self.max_health:
+        self.__health = self.max_health
+
+      # self.__health += self.effects.health
+
+      return self.__health
+     
+    @property
+    def mana(self) -> int:
+      if self.__stamina > self.max_stamina:
+        self.__stamina = self.max_stamina
+
+      # self.__mana += self.effects.mana
+
+      return self.__stamina
+
+    @property
+    def stamina(self) -> int:
+      if self.__mana > self.max_mana:
+        self.__mana = self.max_mana
+      
+      # self.__stamina += self.effects.stamina
+
+      return self.__mana
+
+    @property
+    def strength(self) -> int:
+      base = 10
+      points = 0
+      points += self.level + self.__strength_points
+      
+      return base + points
+
+    @property
+    def constitution(self) -> int:
+      base = 10
+      points = 0
+      points += self.__constitution_points + self.level
+      
+      return base + points
+
+    @property
+    def agility(self) -> int:
+      base = 10
+      points = 0
+      points += self.__agility_points + self.level
+      
+      return base + points
+
+    @property
+    def wisdom(self) -> int:
+      base = 10
+      points = 0
+      points += self.__will_points + self.level
+      
+      return base + points
+
+    @property
+    def intelligence(self) -> int:
+      base = 10
+      points = 0
+      points += self.__intelligence_points + self.level
+      
+      return base + points
+
+    @property
+    def charisma(self) -> int:
+      base = 10
+      points = 0
+      points += self.__charisma_points + self.level
+      
+      return base + points
+
+    @property
+    def stat_points(self) -> int:
+      points = 5
+      points -= (self.__health_points + self.__mana_points + self.__stamina_points + self.__strength_points + self.__constitution_points + self.__agility_points + self.__will_points + self.__intelligence_points + self.__charisma_points)
+      points += (self.__stat_points + self.level)
+
+      return points
+    
+    def __str__(self) -> str:
+      f"{CON}{COL}{VAR}{self.level}"
+      f"{CON}{COL}{VAR}{self.xp}"
+      f"{CON}{COL}{VAR}{self.xp_to_next_level}"
+      f"{CON}{COL}{VAR}{self.max_health}"
+      f"{CON}{COL}{VAR}{self.max_mana}"
+      f"{CON}{COL}{VAR}{self.max_stamina}"
+      f"{CON}{COL}{VAR}{self.health}"
+      f"{CON}{COL}{VAR}{self.mana}"
+      f"{CON}{COL}{VAR}{self.stamina}"
+      f"{CON}{COL}{VAR}{self.strength}"
+      f"{CON}{COL}{VAR}{self.constitution}"
+      f"{CON}{COL}{VAR}{self.agility}"
+      f"{CON}{COL}{VAR}{self.intelligence}"
+      f"{CON}{COL}{VAR}{self.charisma}"
+      f"{CON}{COL}{VAR}{self.stat_points}"
+      return f""
+
+
+
+
   class Inventory:
     def __init__(self, inventories: list[Inventory]):
       if not isinstance(inventories, list):
@@ -702,26 +911,39 @@ class Character:
       else:
         raise TypeError(f"key must be int or str not {type(key)}")
 
-  
+
+
+
   class Info:
-    def __init__(self, name: "Character.Info.Name", race, age: int = -1, gender: str = "random", description: str = "N/A"):
-      self.name = self.Name()
+    def __init__(self, given_name: str, sir_name: str, middle_names: list[str], race, age: int = -1, gender: str = "random", description: str = "N/A"):
+      if not isinstance(given_name, str):
+        raise ValueError(f"name must be a str not {type(given_name)}")
+      if not isinstance(race, str):
+        raise ValueError(f"race must be a str not {type(race)}")
+      if age < -1:
+        raise ValueError("age must be greater than or equal to -1(set to -1 to disable age)")
+      if not isinstance(gender, str):
+        raise ValueError(f"gender must be a str not {type(gender)}")
+      if not isinstance(description, str):
+        raise ValueError(f"description must be a str not {type(description)}")
+      self.name = self.Name(given_name, sir_name, middle_names)
       self.race = None
-      self.age = 0
+      self.age = age
       self.gender = gender
-      self.description = ""
+      self.description = description
 
     def __str__(self):
-      return f"Name:"\
-        f"Race:"\
-        f"Age:"\
-        f"Gender:"\
-        f"Descriptoin:"\
+      return f"{CON}Name{COL}{VAR}{self.name.full}{DEFA}"\
+        f"{f"\n{CON}Race{COL}{VAR}{self.race}" if self.race != None else ""}{DEFA}"\
+        f"{f"\n{CON}Age{COL}{VAR}{self.age}" if self.age != -1 else ""}{DEFA}"\
+        f"\n{CON}Gender{COL}{VAR}{self.gender}{DEFA}"\
+        f"\n{CON}Description{COL}{VAR}{self.description}{DEFA}"\
+
 
     class Name:
       def __init__(self, given: str, sir: str, middle: list[str]):
         self.given = given
-        self.middle = middle
+        self.middle = list(middle)
         self.sir = sir
       
       @property
@@ -730,7 +952,3 @@ class Character:
         for i in self.middle:
           string += f"{i} "
         return f"{self.given} {string}{self.sir}"
-
-
-
-

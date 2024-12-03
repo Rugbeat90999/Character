@@ -1,0 +1,80 @@
+{
+  "N/A":"No aplica",
+  "prints":
+  {
+    "item": "Elemento",
+    "registry_name": "Nombre del registro",
+    "display_name": "Nombre para mostrar",
+    "value": "Valor",
+    "stack_size": "Tamaño de la pila",
+    "weight": "Peso",
+    "description": "Descripción",
+    "tags": "Etiquetas"
+  },
+  "item":
+  {
+  "RING_OF_FIRE.display_name": "Anillo de Fuego",
+  "RING_OF_WATER.display_name": "Anillo de Agua",
+  "RING_OF_EARTH.display_name": "Anillo de Tierra",
+  "RING_OF_AIR.display_name": "Anillo de Aire",
+  "RING_OF_LIFE.display_name": "Anillo de Vida",
+  "RING_OF_PROTECTION.display_name": "Anillo de Protección",
+  "RING_OF_HEALTH.display_name": "Anillo de Salud",
+  "RING_OF_REGENERATION.display_name": "Anillo de Regeneración",
+  "RING_OF_MANA.display_name": "Anillo de Maná",
+  "RING_OF_THE_ELEMENTS.display_name": "Anillo de los Elementos",
+  "RING_OF_FOCUS.display_name": "Anillo de Enfoque",
+  "RING_OF_THE_WARRIOR.display_name": "Anillo del Guerrero",
+  "RING_OF_THE_MAGE.display_name": "Anillo del Mago",
+  "RING_OF_THE_HUNTER.display_name": "Anillo del Cazador",
+  "RING_OF_THE_SPIRIT.display_name": "Anillo del Espíritu",
+
+  "MASK_OF_SHADOWS.display_name": "Máscara de Sombras",
+  "MASK_OF_TERROR.display_name": "Máscara de Terror",
+  "MASK_OF_SMILES.display_name": "Máscara de Sonrisas",
+  "MASK_OF_DEATH.display_name": "Máscara de Muerte",
+  "MASK_OF_VISION.display_name": "Máscara de Visión",
+
+  "AMULET_OF_POWER.display_name": "Amuleto de Poder",
+  "AMULET_OF_FORTUNE.display_name": "Amuleto de Fortuna",
+  "PENDANT_OF_MAGIC.display_name": "Colgante de Magia",
+  "NECKLACE_OF_THE_SEA.display_name": "Collar del Mar",
+  "NECKLACE_OF_LIGHT.display_name": "Collar de Luz",
+
+  "CAPE_OF_THE_HERO.display_name": "Capa del Héroe",
+  "CAPE_OF_WINDS.display_name": "Capa de los Vientos",
+  "CAPE_OF_SHADOWS.display_name": "Capa de Sombras",
+  "CAPE_OF_FLAMES.display_name": "Capa de Llamas",
+  "CAPE_OF_FROST.display_name": "Capa de Escarcha",
+
+  "BELT_OF_GIANT_STRENGTH.display_name": "Cinturón de Fuerza Gigante",
+  "BELT_OF_AGILITY.display_name": "Cinturón de Agilidad",
+  "BELT_OF_ENDURANCE.display_name": "Cinturón de Resistencia",
+  "BELT_OF_THIEVES.display_name": "Cinturón de Ladrones",
+  "BELT_OF_TIME.display_name": "Cinturón del Tiempo",
+
+  "BRACERS_OF_DEFENSE.display_name": "Brazales de Defensa",
+  "BRACERS_OF_SWIFTNESS.display_name": "Brazales de Rapidez",
+  "WRISTBAND_OF_POWER.display_name": "Pulsera de Poder",
+  "WRISTBAND_OF_GRACE.display_name": "Pulsera de Gracia",
+  "CUFFS_OF_MAGIC.display_name": "Puños de Magia",
+
+  "ANKLET_OF_LIGHTNESS.display_name": "Tobillera de Ligereza",
+  "ANKLET_OF_SWIFTNESS.display_name": "Tobillera de Rapidez",
+  "ANKLET_OF_STABILITY.display_name": "Tobillera de Estabilidad",
+  "ANKLET_OF_GRACE.display_name": "Tobillera de Gracia",
+  "ANKLET_OF_STRENGTH.display_name": "Tobillera de Fuerza",
+
+  "EARRINGS_OF_INSIGHT.display_name": "Pendientes de Perspicacia",
+  "EARRINGS_OF_STRENGTH.display_name": "Pendientes de Fuerza",
+  "EARRINGS_OF_MAGIC.display_name": "Pendientes de Magia",
+  "EARRINGS_OF_FOCUS.display_name": "Pendientes de Enfoque",
+  "EARRINGS_OF_CHARISMA.display_name": "Pendientes de Carisma",
+
+  "GLOVES_OF_POWER.display_name": "Guantes de Poder",
+  "GLOVES_OF_MAGIC.display_name": "Guantes de Magia",
+  "GLOVES_OF_SWIFTNESS.display_name": "Guantes de Rapidez",
+  "GLOVES_OF_GRIP.display_name": "Guantes de Agarre",
+  "GLOVES_OF_PROTECTION.display_name": "Guantes de Protección"
+  }
+}

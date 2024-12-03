@@ -3,53 +3,58 @@ from define import Tag
 
 
 
-TAG_ITEM = Tag("item")
+ITEM = Tag("item")
 
 
 
-TAG_WEARABLE = Tag("wearable", TAG_ITEM)
-TAG_USABLE = Tag("usable", TAG_ITEM)
+WEARABLE = Tag("wearable", ITEM)
+USABLE = Tag("usable", ITEM)
 
 
 
-TAG_ARMOR = Tag("armor", TAG_WEARABLE)
-TAG_CLOTHES = Tag("cloths", TAG_WEARABLE)
-TAG_TRINKETS = Tag("trinkets", TAG_WEARABLE)
+ARMOR = Tag("armor", WEARABLE)
+CLOTHES = Tag("cloths", WEARABLE)
+TRINKETS = Tag("trinkets", WEARABLE)
 
 
-TAG_WEAPON = Tag("weapon", TAG_USABLE)
-TAG_TOOL = Tag("tool", TAG_USABLE)
+WEAPON = Tag("weapon", USABLE)
+TOOL = Tag("tool", USABLE)
 
 
 
-TAG_ARMOR_HEAD = Tag("head", TAG_ARMOR)
-TAG_ARMOR_BODY = Tag("body", TAG_ARMOR)
-TAG_ARMOR_HANDS = Tag("hands", TAG_ARMOR)
-TAG_ARMOR_LEGS = Tag("legs", TAG_ARMOR)
-TAG_ARMOR_FEET = Tag("feet", TAG_ARMOR)
+ARMOR_HEAD = Tag("head", ARMOR)
+ARMOR_BODY = Tag("body", ARMOR)
+ARMOR_HANDS = Tag("hands", ARMOR)
+ARMOR_TAIL = Tag("tail", ARMOR)
+ARMOR_LEGS = Tag("legs", ARMOR)
+ARMOR_FEET = Tag("feet", ARMOR)
 
-TAG_CLOTHES_HEAD = Tag("head", TAG_CLOTHES)
-TAG_CLOTHES_UPPPER_UNDIES = Tag("upperundies", TAG_CLOTHES)
-TAG_CLOTHES_BODY = Tag("body", TAG_CLOTHES)
-TAG_CLOTHES_HANDS = Tag("hands", TAG_CLOTHES)
-TAG_CLOTHES_UNDERWEAR = Tag("lowerundies", TAG_CLOTHES)
-TAG_CLOTHES_LEGS = Tag("legs", TAG_CLOTHES)
-TAG_CLOTHES_SOCKS = Tag("feetundies", TAG_CLOTHES)
-TAG_CLOTHES_FEET = Tag("feet", TAG_CLOTHES)
+CLOTHES_HEAD = Tag("head", CLOTHES)
+CLOTHES_UPPPER_UNDIES = Tag("upperundies", CLOTHES)
+CLOTHES_BODY = Tag("body", CLOTHES)
+CLOTHES_HANDS = Tag("hands", CLOTHES)
+CLOTHES_TAILS = Tag("tails", CLOTHES)
+CLOTHES_UNDERWEAR = Tag("lowerundies", CLOTHES)
+CLOTHES_LEGS = Tag("legs", CLOTHES)
+CLOTHES_SOCKS = Tag("feetundies", CLOTHES)
+CLOTHES_FEET = Tag("feet", CLOTHES)
 
-TAG_TRINKETS_FACE = Tag("face", TAG_TRINKETS)
-TAG_TRINKETS_EAR = Tag("ear", TAG_TRINKETS)
-TAG_TRINKETS_NECK = Tag("neck", TAG_TRINKETS)
-TAG_TRINKETS_CAPE = Tag("cape", TAG_TRINKETS)
-TAG_TRINKETS_WRIST = Tag("wrist", TAG_TRINKETS)
-TAG_TRINKETS_HAND = Tag("hand", TAG_TRINKETS)
-TAG_TRINKETS_FINGER = Tag("finger", TAG_TRINKETS)
-TAG_TRINKETS_BELT = Tag("belt", TAG_TRINKETS)
-TAG_TRINKETS_ANKLE = Tag("ankle", TAG_TRINKETS)
+TRINKETS_FACE = Tag("face", TRINKETS)
+TRINKETS_EAR = Tag("ear", TRINKETS)
+TRINKETS_NECK = Tag("neck", TRINKETS)
+TRINKETS_CAPE = Tag("cape", TRINKETS)
+TRINKETS_WRIST = Tag("wrist", TRINKETS)
+TRINKETS_HAND = Tag("hand", TRINKETS)
+TRINKETS_FINGER = Tag("finger", TRINKETS)
+TRINKETS_TAIL = Tag("tail", TRINKETS)
+TRINKETS_BELT = Tag("belt", TRINKETS)
+TRINKETS_ANKLE = Tag("ankle", TRINKETS)
 
 
-TAG_MASSIVE = Tag("massive", TAG_WEAPON)
-TAG_HEAVY = Tag("heavy", TAG_WEAPON)
-TAG_MEDIUM = Tag("medium", TAG_WEAPON)
-TAG_LIGHT = Tag("light", TAG_WEAPON)
-TAG_BOW = Tag("bow", TAG_WEAPON)
+MASSIVE = Tag("massive", WEAPON)
+HEAVY = Tag("heavy", WEAPON)
+MEDIUM = Tag("medium", WEAPON)
+LIGHT = Tag("light", WEAPON)
+RANGED = Tag("bow", WEAPON)
+
+SILVER = Tag("silver", WEAPON)
