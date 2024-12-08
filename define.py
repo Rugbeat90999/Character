@@ -1,4 +1,5 @@
 from CommonLib.classes import UUID, OutputColors, Path
+from CommonLib.functional_classes import staticproperty
 import json
 
 
@@ -7,7 +8,7 @@ import json
 # Colors for console output
 DEFA = str(OutputColors())
 TITLE = str(OutputColors(font="bold", color="red"))
-COL = str(OutputColors(color="magenta")) + ": " + str(DEFA)
+COL = str(OutputColors(color="magenta")) + ":" + str(DEFA)
 CON = str(OutputColors(color="green"))
 VAR = str(OutputColors(color="cyan"))
 CBO = str(OutputColors(color="yellow")) + "\u007b" + str(DEFA)
@@ -24,8 +25,163 @@ def settings() -> dict:
 
 def lang() -> dict:
   with open(Path(f"./lang/{settings()["GENERAL"]["lang"]}.json").path, "r", encoding="utf-8") as file:
-    return json.load(file)
+    to_parse = json.load(file)
+    
+    try:
+      to_parse["word_direction"]
+    except:
+      to_parse.update({"word_direction": "right"})
 
+    try:
+      to_parse["numeral_direction"]
+    except:
+      to_parse.update({"numeral_direction": "right"})
+
+    try:
+      numbers = to_parse["numerals"]
+      temp = {}
+      for x in numbers:
+        y = numbers[str(x)]
+        temp.update({y: x})
+      to_parse["numerals"].update(temp)
+    except:
+      to_parse.update({"numerals": {"0":"0","1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9"}})
+
+    return to_parse
+
+
+class Parser:
+  @staticmethod
+  def print_lang(print_word: str) -> str:
+    race_lang = lang()["race"]
+    try:
+      display_name = race_lang[f"{print_word}"]
+      display_name.strip()
+      if display_name == "":
+        display_name = print_word
+    except:
+      display_name = print_word
+    return display_name
+
+
+
+  @staticmethod
+  def number_lang(number: str) -> str:
+    value = ""
+    numeral_lang = lang()["numerals"]
+    numeral_direction = lang()["numeral_direction"]
+
+    for char in str(number):
+      value += numeral_lang[char]
+
+
+    if numeral_direction == "left":
+      value_change_list = []
+      for char in value:
+        value_change_list.insert(0, char)
+      value = "".join(value_change_list)
+
+    return value
+
+
+  @staticmethod
+  def lang_number(number: str) -> str:
+    value = ""
+    numeral_lang = lang()["numerals"]
+    numeral_direction = lang()["numeral_direction"]
+
+    for char in str(number):
+      value += numeral_lang[char]
+
+
+    if numeral_direction == "left":
+      value_change_list = []
+      for char in value:
+        value_change_list.insert(0, char)
+      value = "".join(value_change_list)
+
+    return value
+
+
+  @staticmethod
+  def item_lang(registry_name: str) -> tuple[str, str]:
+      item_lang = lang()["item"]
+
+      try:
+        display_name = item_lang[f"{registry_name}.display_name"]
+        display_name.strip()
+        if display_name == "":
+          display_name = registry_name
+      except:
+        display_name = registry_name
+
+
+      try:
+        description = item_lang[f"{registry_name}.description"]
+        description.strip()
+        if description == "":
+          description = lang()["N/A"]
+      except:
+        description = lang()["N/A"]
+
+      return (display_name, description)
+
+
+  @staticproperty
+  def NA():
+    return lang()["N/A"]
+
+
+  @staticmethod
+  def Tags(tag_list: list[str]) -> str:
+    tag_str = ""
+    for tag in tag_list:
+      tag_str += f"{VAR}{tag}{DEFA}{COM}"
+    tag_str = tag_str.rstrip(COM)
+
+    if tag_list == "":
+      tag_list = Parser.NA
+
+    return tag_str
+
+
+  @staticmethod
+  def race_lang(registry_name: str):
+    race_lang = lang()["race"]
+    try:
+      display_name = race_lang[f"{registry_name}.display_name"]
+      display_name.strip()
+      if display_name == "":
+        display_name = registry_name
+    except:
+      display_name = registry_name
+    return display_name
+
+
+  @staticmethod
+  def inventory_lang(registry_name: str):
+    race_lang = lang()["inventory"]
+    try:
+      display_name = race_lang[f"{registry_name}.display_name"]
+      display_name.strip()
+      if display_name == "":
+        display_name = registry_name
+    except:
+      display_name = registry_name
+    return display_name
+
+
+  @staticmethod
+  def slot_lang(slot_name: str):
+    race_lang = lang()["slot"]
+    try:
+      display_name = race_lang[f"{slot_name}.display_name"]
+      display_name.strip()
+      if display_name == "":
+        display_name = slot_name
+    except:
+      display_name = slot_name
+    return display_name
 
 
 
@@ -41,9 +197,6 @@ class Registry:
   @property
   def names(self):
     return [registry_item["name"] for registry_item in self.__registry]
-
-  # def __str__(self):
-
 
 
   def get(self, name: str):
@@ -136,20 +289,38 @@ class Item:
     return self.__registry_name
 
   def __str__(self) -> str:
-    tags = ""
-    for tag in self.__tags:
-      tags += f"{COM}{VAR}{tag}{DEFA}"
-    tags.lstrip(COM)
     print_lang = lang()["prints"]
+    word_direction = lang()["word_direction"]
 
-    return f"{TITLE}{print_lang["item"]}{COL}{DEFA}"\
-  f"\n{CON} {print_lang["registry_name"]}{COL} {VAR}{None}{DEFA}"\
-  f"\n{CON} {print_lang["display_name"]}{COL} {VAR}{None}{DEFA}"\
-  f"{f"\n{CON} {print_lang["value"]}{COL} {VAR}{self.__value}" if self.__value != -1 else ""}{DEFA}"\
-  f"{f"\n{CON} {print_lang["stack_size"]}{COL} {VAR}{self.__stack_size}" if self.__stack_size != 0 else ""}{DEFA}"\
-  f"{f"\n{CON} {print_lang["weight"]}{COL} {VAR}{self.__weight}" if self.__weight != -1 else ""}{DEFA}"\
-  f"\n{CON} {print_lang["description"]}{COL} {VAR}{None}{DEFA}"\
-  f"\n{CON} {print_lang["tags"]}{COL} {VAR}{None}{DEFA}"\
+    value = Parser.number_lang(self.__value)
+    stack_size = Parser.number_lang(self.__stack_size)
+    weight = Parser.number_lang(self.__weight)
+
+    display_name, description = Parser.item_lang(self.__registry_name)
+
+    tags = Parser.Tags(self.__tags)
+
+
+
+    right = f"{TITLE}{print_lang["item"]}{COL} {DEFA}"\
+  f"\n{CON} {print_lang["registry_name"]}{COL} {VAR}{self.registry_name}{DEFA}"\
+  f"\n{CON} {print_lang["display_name"]}{COL} {VAR}{display_name}{DEFA}"\
+  f"{f"\n{CON} {print_lang["value"]}{COL} {VAR}{value}" if self.__value != -1 else ""}{DEFA}"\
+  f"{f"\n{CON} {print_lang["stack_size"]}{COL} {VAR}{stack_size}" if self.__stack_size != 0 else ""}{DEFA}"\
+  f"{f"\n{CON} {print_lang["weight"]}{COL} {VAR}{weight}" if self.__weight != -1 else ""}{DEFA}"\
+  f"\n{CON} {print_lang["description"]}{COL} {VAR}{description}{DEFA}"\
+  f"\n{CON} {print_lang["tags"]}{COL} {VAR}{tags}{DEFA}"\
+
+    left = f"{COL}{TITLE}{print_lang["item"]}{DEFA}"\
+  f"\n{VAR}{self.registry_name}{COL}{CON}{print_lang["registry_name"]}{DEFA}"\
+  f"\n{VAR}{display_name}{COL}{CON}{print_lang["display_name"]}{DEFA}"\
+  f"{f"\n{VAR}{value}{COL}{CON}{print_lang["value"]}" if self.__value != -1 else ""}{DEFA}"\
+  f"{f"\n{VAR}{stack_size}{COL}{CON}{print_lang["stack_size"]}" if self.__stack_size != 0 else ""}{DEFA}"\
+  f"{f"\n{VAR}{weight}{COL}{CON}{print_lang["weight"]}" if self.__weight != -1 else ""}{DEFA}"\
+  f"\n{VAR}{description}{COL}{CON}{print_lang["description"]}{DEFA}"\
+  f"\n{VAR}{tags}{COL}{CON}{print_lang["tags"]}{DEFA}"\
+
+    return left if word_direction == "left" else right
   
   def __getitem__(self, key):
     if not isinstance(key, (str, int)):
@@ -158,15 +329,15 @@ class Item:
       case "registry_name":
         return self.__registry_name
       case "display_name":
-        return self.__display_name
+        return Parser.item_lang(self.__description)[0]
       case "weight":
-        return self.__weight
+        return Parser.number_lang(self.__weight)
       case "value":
-        return self.__value
+        return Parser.number_lang(self.__value)
       case "stack_size":
-        return self.__stack_size
+        return Parser.number_lang(self.__stack_size)
       case "description":
-        return self.__description
+        return Parser.item_lang(self.__description)[1]
       case _:
         raise KeyError(f"Invalid key: {key}")
 
@@ -175,9 +346,9 @@ class Item:
       raise TypeError(f"Invalid type: {type(key)}")
     match key:
       case "registry_name":
-        raise AssertionError("Cannot set registry name outside of definistion of item")
+        raise AssertionError("Cannot set registry name outside of definition of item")
       case "display_name":
-        raise AssertionError("Cannot set registry name outside of definistion of item")
+        raise AssertionError("Cannot set display name outside of lang file")
       case "weight":
         self.set_weight(value)
       case "value":
@@ -194,7 +365,10 @@ class Item:
     if self.__value == -1:
       raise AssertionError("value cannot be set as it's diabled in this item's registry")
     if not isinstance(new_value, int):
-      raise ValueError(f"value must be an int not {type(new_value)}")
+      try:
+        new_weight = Parser.lang_number(new_weight)
+      except:
+        raise ValueError(f"value must be an int not {type(new_value)}")
     if new_value < -1:
       raise ValueError("value cannot be less than -1")
     self.__value = new_value
@@ -205,7 +379,10 @@ class Item:
     if self.__stack_size == 0:
       raise AssertionError("stack_size cannot be set as it's diabled in this item's registry")
     if not isinstance(new_stack_size, int):
-      raise ValueError(f"stack_size must be an int not {type(new_stack_size)}")
+      try:
+        new_weight = Parser.lang_number(new_weight)
+      except:
+        raise ValueError(f"stack_size must be an int not {type(new_stack_size)}")
     self.__stack_size = new_stack_size
     return self
 
@@ -213,8 +390,13 @@ class Item:
   def set_weight(self, new_weight: int):
     if self.__weight == -1:
       raise AssertionError("weight cannot be set as it's diabled in this item's registry")
+
     if not isinstance(new_weight, int):
-      raise ValueError(f"weight must be an int not {type(new_weight)}")
+      try:
+        new_weight = Parser.lang_number(new_weight)
+      except:
+        raise ValueError(f"weight must be an int not {type(new_weight)}")
+
     self.__weight = new_weight
     return self
 
@@ -407,6 +589,8 @@ class Slot:
         return self.__slot_num
       case "slot_name":
         return self.__slot_name
+      case "display_name":
+        return Parser.slot_lang(self.__slot_name)
       case "item":
         return self.__item
       case "amount":
@@ -489,14 +673,14 @@ class Slot:
 
 
 class Inventory:
-  def __init__(self, size: int, name: str, display_name: str):
+  registry = Registry()
+  def __init__(self, size: int, registry_name: str):
     if not isinstance(size, int):
       raise ValueError(f"size must be an int not {type(size)}")
     if size < 0:
       raise ValueError("size must be greater than or qualt to 0(set to 0 to disable size limit)")
     self.__slots = list[Slot]()
-    self.__name = name
-    self.__display_name = display_name
+    self.__registry_name = registry_name
 
     for i in range(size):
       self.__slots.append(Slot(i))
@@ -505,7 +689,8 @@ class Inventory:
     string = ""
     for slot in self.__slots:
       string += f"\n {str(slot)}"
-    return f"{TITLE}{self.__display_name}{COL}{DEFA}{string}{DEFA}"
+
+    return f"{TITLE}{self["display_name"]}{COL}{DEFA}{string}{DEFA}"
 
   def __getitem__(self, key) -> Slot:
     if isinstance(key, int):
@@ -516,9 +701,9 @@ class Inventory:
     elif isinstance(key, str):
       match key:
         case "name":
-          return self.__name
+          return self.__registry_name
         case "display_name":
-          return self.__display_name
+          return Parser.inventory_lang(self.__registry_name)
     else:
       raise TypeError(f"key must be int not {type(key)}")
 
@@ -575,13 +760,17 @@ class Inventory:
     raise ValueError(f"Slot {slot_num} does not exist")
 
 
-  def copy(self, new_name, new_display_name):
-    inv  = Inventory(len(self.__slots), new_name, new_display_name)
+  def copy(self, new_name):
+    inv  = Inventory(len(self.__slots), new_name)
     
     for i in range(len(self.__slots)):
       inv.__slots[i] = self.__slots[i]
     
     return inv
+
+
+  def register(self):
+    Inventory.registry.register(self)
 
 
 
@@ -622,8 +811,70 @@ class EffectInstance:
 
 
 
+class Race:
+  registry = Registry()
+  def __init__(self, registry_name: str, inventories: list[Inventory], race_effects: list[Effect]):
+    self.__registry_name = registry_name
+    self.inventories = inventories
+    self.effects = race_effects
+
+  def __str__(self):
+    inventories = ""
+    for inventory in self.inventories:
+      inventories += f"{VAR}{inventory["display_name"]}{COM}"
+    inventories = inventories.rstrip(f"{COM}")
+
+    effects = None
+    # for effect in self.inventories:
+      # effects += f"{VAR}{effect["display_name"]}{COM}"
+    # effects = effects.rstrip(f"{COM}")
+
+    left = f"{TITLE}Race{COL}{DEFA}"\
+    f"\n {CON}{lang()["prints"]["registry_name"]}{COL}{VAR}{self.__registry_name}{DEFA}"\
+    f"\n {CON}{lang()["prints"]["display_name"]}{COL}{VAR}{self["display_name"]}{DEFA}"\
+    f"\n {CON}{lang()["prints"]["inventories"]}{COL}{inventories}{DEFA}"\
+    f"\n {CON}{lang()["prints"]["effects"]}{COL}{VAR}{effects}{DEFA}"\
+    
+    return left
+
+  def __setitem__(self, key, value):
+    match key:
+      case "registry_name":
+        raise ValueError("Cannot change registry_name outside of difinition")
+      case "display_name":
+        raise ValueError("Cannot change display_name outside of lang file")
+      case "inventories":
+        if not isinstance(value, list):
+          raise TypeError(f"value must be a list of Inventory not {type(value)}")
+        for inventory in value:
+          if not isinstance(inventory, Inventory):
+            raise TypeError(f"value must be a list of Inventory not {type(inventory)}")
+        self.inventories = value
+      case "effects":
+        if not isinstance(value, list):
+          raise TypeError(f"value must be a list of Effect not {type(value)}")
+        for effect in value:
+          if not isinstance(effect, Effect):
+            raise TypeError(f"value must be a list of Effect not {type(effect)}")
+        self.effects = value
+
+  def __getitem__(self, key):
+    match key:
+      case "registry_name":
+        return self.__registry_name
+      case "display_name":
+        return Parser.race_lang(f"{self.__registry_name}")
+        
+      case "inventories":
+        return self.inventories
+      case "effects":
+        return self.effects
+    
+    return None
 
 
+  def register(self):
+    Race.registry.register(self)
 
 
 
@@ -658,7 +909,7 @@ class Character:
     charisma = 0
     stat_points = 0
 
-    # open an parse file
+    # open and parse file
     with open(char_file.path, "r") as file:
       char_data = "".join(file.readlines())
       li = dict[str, str]()
@@ -706,7 +957,7 @@ class Character:
 
     self.__registry_name = None
     self.status = self.Status()
-    # self.inventory = self.Inventory()
+    self.inventory = self.Inventory(race)
     self.info = self.Info(given_name, sir_name, middle_names, race, age, gender, description)
 
   def __str__(self):
@@ -893,14 +1144,28 @@ class Character:
 
 
   class Inventory:
-    def __init__(self, inventories: list[Inventory]):
-      if not isinstance(inventories, list):
-        raise ValueError(f"inventories must be a list of Inventory not {type(inventories)}")
-      for inventory in inventories:
-        if not isinstance(inventory, Inventory):
-          raise ValueError(f"inventories must be a list of Inventory, cannot contain {type(inventory)}")
+    def __init__(self, race: str):
+      "human",
+      "elf",
+      "dwarf",
+      "orc",
+      "kitsune",
+      "kobold",
+      "tiny",
+      "giant",
+      "pixie",
+      "fairy",
+      "sprite",
+      "imp",
+      "gnome",
+      "goblin",
+      "hobgoblin",
+      "leprechaun",
+      "troll"
 
-      self.__inventories = inventories
+
+      # self.__inventories = inventories
+
     
     def __getitem__(self, key) -> Inventory:
       if isinstance(key, str):

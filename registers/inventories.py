@@ -2,47 +2,45 @@ from define import Inventory
 from registers import tags
 
 
-
-BASE_STASH = Inventory(50, "STASH", "Stash")
-BASE_EQUIPPMENT = Inventory(5, "EQUIPPMENT", "Equippment")
-BASE_TRINKETS = Inventory(22, "TRINKETS", "Trinkets")
-BASE_USABLE = Inventory(6, "USABLE", "Usable")
-BASE_ACTIVE = Inventory(2, "ACTIVE", "Active")
-
-
+BASE_STASH = Inventory(50, "STASH")
+BASE_EQUIPPMENT = Inventory(5, "EQUIPPMENT")
+BASE_TRINKETS = Inventory(22, "TRINKETS")
+BASE_USABLE = Inventory(6, "USABLE")
+BASE_ACTIVE = Inventory(2, "ACTIVE")
 
 
 
 
 BASE_TRINKETS[0]["slot_name"] = "face"
 BASE_TRINKETS[0]["tags"] = [tags.TRINKETS_FACE]
-BASE_TRINKETS[1]["slot_name"] = "Left Ear"
+BASE_TRINKETS[1]["slot_name"] = "left_ear"
 BASE_TRINKETS[1]["tags"] = [tags.TRINKETS_EAR]
-BASE_TRINKETS[2]["slot_name"] = "Right Ear"
+BASE_TRINKETS[2]["slot_name"] = "right_ear"
 BASE_TRINKETS[2]["tags"] = [tags.TRINKETS_EAR]
 BASE_TRINKETS[3]["slot_name"] = "neck"
 BASE_TRINKETS[3]["tags"] = [tags.TRINKETS_NECK]
 BASE_TRINKETS[4]["slot_name"] = "cape"
 BASE_TRINKETS[4]["tags"] = [tags.TRINKETS_CAPE]
-BASE_TRINKETS[5]["slot_name"] = "Left Wrist"
+BASE_TRINKETS[5]["slot_name"] = "left_wrist"
 BASE_TRINKETS[5]["tags"] = [tags.TRINKETS_WRIST]
-BASE_TRINKETS[6]["slot_name"] = "Right Wrist"
+BASE_TRINKETS[6]["slot_name"] = "right_wrist"
 BASE_TRINKETS[6]["tags"] = [tags.TRINKETS_WRIST]
-BASE_TRINKETS[7]["slot_name"] = "Left Hand"
+BASE_TRINKETS[7]["slot_name"] = "left_hand"
 BASE_TRINKETS[7]["tags"] = [tags.TRINKETS_HAND]
-BASE_TRINKETS[8]["slot_name"] = "Right Hand"
+BASE_TRINKETS[8]["slot_name"] = "right_hand"
 BASE_TRINKETS[8]["tags"] = [tags.TRINKETS_HAND]
+
 
 start = 9
 hands = 2
 fingers = 5
 
 
-for j in range(hands):
- index = (j * fingers) + start
- for k in range(fingers):
-   jndex = k + index
-   BASE_TRINKETS[jndex]["slot_name"] = f"finger_{j+1}_{k+1}"
+for i in range(hands):
+ index = (i * fingers) + start
+ for j in range(fingers):
+   jndex = j + index
+   BASE_TRINKETS[jndex]["slot_name"] = f"finger_{i+1}_{j+1}"
    BASE_TRINKETS[jndex]["tags"] = [tags.TRINKETS_FINGER]
 
 
@@ -64,6 +62,8 @@ BASE_EQUIPPMENT[3]["slot_name"] = "legs"
 BASE_EQUIPPMENT[3]["tags"] = [tags.ARMOR_LEGS]
 BASE_EQUIPPMENT[4]["slot_name"] = "feet"
 BASE_EQUIPPMENT[4]["tags"] = [tags.ARMOR_FEET]
+
+
 
 BASE_USABLE[0]["slot_name"] = "Right Shoulder"
 BASE_USABLE[0]["tags"] = [tags.HEAVY, tags.MASSIVE]
@@ -88,12 +88,13 @@ BASE_ACTIVE[1]["tags"] = [tags.USABLE]
 
 
 
-HUMAN = [BASE_STASH.copy("STASH", "Stash"), BASE_EQUIPPMENT.copy("EQUIPPMENT", "Equippment"), BASE_TRINKETS.copy("TRINKETS", "Trinkets"), BASE_USABLE.copy("USABLE", "Usable"), BASE_ACTIVE.copy("ACTIVE", "Active")]
-ELF = [BASE_STASH.copy("STASH", "Stash"), BASE_EQUIPPMENT.copy("EQUIPPMENT", "Equippment"), BASE_TRINKETS.copy("TRINKETS", "Trinkets"), BASE_USABLE.copy("USABLE", "Usable"), BASE_ACTIVE.copy("ACTIVE", "Active")]
-DWARF = [BASE_STASH.copy("STASH", "Stash"), BASE_EQUIPPMENT.copy("EQUIPPMENT", "Equippment"), BASE_TRINKETS.copy("TRINKETS", "Trinkets"), BASE_USABLE.copy("USABLE", "Usable"), BASE_ACTIVE.copy("ACTIVE", "Active")]
-ORC = [BASE_STASH.copy("STASH", "Stash"), BASE_EQUIPPMENT.copy("EQUIPPMENT", "Equippment"), BASE_TRINKETS.copy("TRINKETS", "Trinkets"), BASE_USABLE.copy("USABLE", "Usable"), BASE_ACTIVE.copy("ACTIVE", "Active")]
-KITSUNE = [BASE_STASH.copy("STASH", "Stash"), BASE_EQUIPPMENT.copy("EQUIPPMENT", "Equippment"), BASE_TRINKETS.copy("TRINKETS", "Trinkets"), BASE_USABLE.copy("USABLE", "Usable"), BASE_ACTIVE.copy("ACTIVE", "Active")]
-KOBOLD = [BASE_STASH.copy("STASH", "Stash"), BASE_EQUIPPMENT.copy("EQUIPPMENT", "Equippment"), BASE_TRINKETS.copy("TRINKETS", "Trinkets"), BASE_USABLE.copy("USABLE", "Usable"), BASE_ACTIVE.copy("ACTIVE", "Active")]
+HUMAN = [BASE_STASH.copy("STASH"), BASE_EQUIPPMENT.copy("EQUIPPMENT"), BASE_TRINKETS.copy("TRINKETS"), BASE_USABLE.copy("USABLE"), BASE_ACTIVE.copy("ACTIVE")]
+ELF = [BASE_STASH.copy("STASH"), BASE_EQUIPPMENT.copy("EQUIPPMENT"), BASE_TRINKETS.copy("TRINKETS"), BASE_USABLE.copy("USABLE"), BASE_ACTIVE.copy("ACTIVE")]
+DWARF = [BASE_STASH.copy("STASH"), BASE_EQUIPPMENT.copy("EQUIPPMENT"), BASE_TRINKETS.copy("TRINKETS"), BASE_USABLE.copy("USABLE"), BASE_ACTIVE.copy("ACTIVE")]
+ORC = [BASE_STASH.copy("STASH"), BASE_EQUIPPMENT.copy("EQUIPPMENT"), BASE_TRINKETS.copy("TRINKETS"), BASE_USABLE.copy("USABLE"), BASE_ACTIVE.copy("ACTIVE")]
+KITSUNE = [BASE_STASH.copy("STASH"), BASE_EQUIPPMENT.copy("EQUIPPMENT"), BASE_TRINKETS.copy("TRINKETS"), BASE_USABLE.copy("USABLE"), BASE_ACTIVE.copy("ACTIVE")]
+KOBOLD = [BASE_STASH.copy("STASH"), BASE_EQUIPPMENT.copy("EQUIPPMENT"), BASE_TRINKETS.copy("TRINKETS"), BASE_USABLE.copy("USABLE"), BASE_ACTIVE.copy("ACTIVE")]
+
 
 
 

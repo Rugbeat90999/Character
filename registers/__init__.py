@@ -1,2 +1,2 @@
-from registers import inventories, items, tags
+from registers import inventories, items, tags, races
 
