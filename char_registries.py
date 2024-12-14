@@ -1,22 +1,8 @@
 from registers import *
 import define
 from define import Character
-from CommonLib.classes import Path
+from CommonLib.classes import Path, UUID
 
 
-
-
-
-
-
-
-# ME_PATH = Path("./char_data/me.char")
-# ME = Character(ME_PATH, "ME")
-
-# print(ME)
-
-
-# items.AMULET_OF_FORTUNE["weight"] = ""
-print(items.AMULET_OF_FORTUNE)
-
-print(races.HUMAN)
+ME = Character(Path("./char_data/me.char"), "ME").register()
+ME2 = Character(Path("./char_data/me copy.char"), "ME2").register()

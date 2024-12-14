@@ -1,7 +1,7 @@
 {
-  "numeral_direction":"left",
-  "N/A":"",
-  "prints":{
+  "numeral_direction": "left",
+  "N/A": "",
+  "prints": {
     "item": "",
     "registry_name": "",
     "display_name": "",
@@ -13,7 +13,24 @@
     "tags": "",
     "race": "",
     "inventories": "",
-    "effects": ""
+    "effects": "",
+    "slot_": "",
+    "character": "",
+    "name":"",
+    "level":"",
+    "experiance_points":"",
+    "health_points":"",
+    "stamina_points":"",
+    "mana_points":"",
+    "strength":"",
+    "constitution":"",
+    "agility":"",
+    "will":"",
+    "perception":"",
+    "intelligence":"",
+    "charisma":"",
+    "stat_points":"",
+    "-": ""
   },
   "numerals": {
     "0": "",
@@ -27,7 +44,7 @@
     "8": "",
     "9": ""
   },
-  "item":{
+  "item": {
     "RING_OF_FIRE.display_name": "",
     "RING_OF_FIRE.description": "",
     "RING_OF_WATER.display_name": "",
@@ -147,7 +164,7 @@
     "GLOVES_OF_PROTECTION.display_name": "",
     "GLOVES_OF_PROTECTION.description": ""
   },
-  "race":{
+  "race": {
     "ELF.display_name": "",
     "DWARF.display_name": "",
     "HUMAN.display_name": "",
@@ -165,14 +182,14 @@
     "GOBLIN.display_name": "",
     "TROLL.display_name": ""
   },
-  "inventory":{
+  "inventory": {
     "STASH.display_name":"",
     "EQUIPPMENT.display_name":"",
     "TRINKETS.display_name":"",
     "USABLE.display_name":"",
     "ACTIVE.display_name":""
   },
-  "slot":{
+  "slot": {
     "face.display_name":"",
     "left_ear.display_name":"",
     "right_ear.display_name":"",

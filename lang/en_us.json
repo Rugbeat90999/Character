@@ -1,7 +1,6 @@
 {
   "N/A":"N/A",
-  "prints":
-  {
+  "prints":{
     "item": "Item",
     "registry_name": "Registry Name",
     "display_name": "Display Name",
@@ -10,7 +9,29 @@
     "weight": "Weight",
     "description": "Description",
     "None":"None",
-    "tags": "Tags"
+    "tags": "Tags",
+    "race":"Race",
+    "inventories": "Inventories",
+    "inventory": "Inventory",
+    "effects": "Effects",
+    "slot_": "Slot_",
+    "character": "Character",
+    "name": "Name",
+    "level": "Level",
+    "experiance_points": "EXP",
+    "vitality": "Vitality",
+    "stamina": "Stamina",
+    "mana": "Mana",
+    "stamina_points": "SP",
+    "mana_points": "MP",
+    "strength": "Strength",
+    "constitution": "Constitution",
+    "agility": "Agility",
+    "will": "Will",
+    "perception": "Perception",
+    "intelligence": "Intelligence",
+    "stat_points": "Stat Points",
+    "-": "-"
   },
   "numerals": {
     "0": "0",
@@ -24,8 +45,7 @@
     "8": "8",
     "9": "9"
   },
-  "item":
-  {
+  "item":{
     "RING_OF_FIRE.display_name": "Ring of Fire",
     "RING_OF_FIRE.description": "Ring of Fire",
     "RING_OF_WATER.display_name": "Ring of Water",
@@ -144,5 +164,46 @@
     "GLOVES_OF_GRIP.description": "Gloves of Grip",
     "GLOVES_OF_PROTECTION.display_name": "Gloves of Protection",
     "GLOVES_OF_PROTECTION.description": "Gloves of Protection"
+  },
+  "race": {
+    "ELF.display_name": "Elf",
+    "DWARF.display_name": "Dwarf",
+    "HUMAN.display_name": "Human",
+    "DRAGON.display_name": "Dragon",
+    "ORC.display_name": "Orc",
+    "KITSUNE.display_name": "Kitsune",
+    "KOBOLD.display_name": "Kobold",
+    "TINY.display_name": "Tiny",
+    "GIANT.display_name": "Giant",
+    "PIXIE.display_name": "Pixie",
+    "FAIRY.display_name": "Fairy",
+    "SPRITE.display_name": "Sprite",
+    "IMP.display_name": "Imp",
+    "GNOME.display_name": "Gnome",
+    "GOBLIN.display_name": "Goblin",
+    "TROLL.display_name": "Troll"
+  },
+  "inventory": {
+    "STASH.display_name":"Stash",
+    "EQUIPPMENT.display_name":"Equippment",
+    "TRINKETS.display_name":"Trinkets",
+    "USABLE.display_name":"Usable",
+    "active_1.display_name":"Active 1",
+    "active_2.display_name":"Active 2"
+  },
+  "slot": {
+    "face.display_name":"Face",
+    "left_ear.display_name":"Left Ear",
+    "right_ear.display_name":"Right Ear",
+    "neck.display_name":"Neck",
+    "cape.display_name":"Cape",
+    "left_wrist.display_name":"Left Wrist",
+    "right_wrist.display_name":"Right Wrist",
+    "left_hand.display_name":"Left Hand",
+    "right_hand.display_name":"Right Hand"
+  },
+  "info":  {
+    "male": "Male",
+    "female": "Female"
   }
 }

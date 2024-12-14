@@ -1,13 +1,13 @@
 {
 "info":{
   "race": "KITSUNE",
-  "age": 96,
+  "age": 100,
   "gender": "male",
   "description": "tall_bobbob",
   "name": {
-    "given":"first_me",
-    "sir":"last_me",
-    "middle": ["middle1", "middle2", "middle3", "middle4"]
+    "given":"Alzucena",
+    "sir":"Anecuzla",
+    "middle": ["Solo"]
   }
 },
 "inventory":{
@@ -20,7 +20,7 @@
     "man":[100, 0]
   },
   "level":{
-    "exp": 0,
+    "exp": 900,
     "stat_points": 0
   },
   "definite":{
